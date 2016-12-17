@@ -5,27 +5,25 @@
 \author{林陈冉}
 \date{\today}
 
-\usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\geometry{papersize={21cm,29.7cm}}
-\geometry{left=1.91cm,right=1.91cm,top=2.54cm,bottom=2.54cm}
+\usepackage{amsthm}
+\usepackage{geometry}
+	\geometry{papersize={21cm,29.7cm}}
+	\geometry{left=1.91cm,right=1.91cm,top=2.54cm,bottom=2.54cm}
 
-\newtheorem{theo}{定理}[section]
-\newtheorem{define}{定义}[section]
-\newtheorem{algo}{算法}
+\newtheorem{theo}{\bf 定理}[section]
+\newtheorem{define}{\bf 定义}[section]
+\renewcommand{\proofname}{\bf 证明}
+\newtheorem{algo}{\bf 算法}
 
-\newcommand{\s}{\quad}
 \renewcommand{\b}{\textbf}
-\newcommand{\p}{\paragraph{}\s}
+\newcommand{\p}{\paragraph{}\quad}
 \renewcommand{\sp}{\subparagraph}
-\newcommand{\sect}{\section}
-\newcommand{\ssect}{\subsection}
-\newcommand{\sssect}{\subsubsection}
 \newcommand{\equSplit}[1]{\begin{equation}\begin{split}#1\end{split}\end{equation}}
 \newcommand{\equAlign}[1]{\begin{align}#1\end{align}}
 \newcommand{\equ}[1]{\begin{equation}#1\end{equation}}
-\newcommand{\Tst}{\text{s.t.}\s}
+\newcommand{\Tst}{\text{s.t.}\quad}
 \newcommand{\abs}[1]{\lvert#1\rvert}
 \newcommand{\norm}[1]{\lVert#1\rVert}
 \newcommand{\inprod}[1]{\langle#1\rangle}
@@ -42,378 +40,518 @@
 
 \begin{document}
 \maketitle
-	\sect{简介}
-		\ssect{什么是低秩矩阵完整化(low-rank matrix completion)}
+	\section{简介}
+		\subsection{什么是低秩矩阵完整化(low-rank matrix completion)}
+			\paragraph{}
+				\quad 简单来说, 低秩矩阵完整化问题, 就是在仅仅知道矩阵的少部分元素的情况下, 恢复出这个矩阵的所有元素. 这个问题在统计, 图像处理, 计算几何, 机器学习, 信号处理, 模型控制等方面有广泛应用, 比如著名的NetFlix大奖赛问题.
 
-		\p简单来说,低秩矩阵完整化问题,就是在仅仅知道矩阵的少部分元素的情况下,恢复出这个矩阵的所有元素.这个问题在统计,图像处理,计算几何,机器学习,信号处理,模型控制等方面有广泛应用,比如著名的NetFlix大奖赛问题.
-
-		\ssect{数学模型}
-
-		\p显而易见,补全一个完全随机的矩阵几乎是不可能的,也是意义不大的.一般情况下,我们认为所需要补全的矩阵是有一定规律的,也就是说,这个矩阵的秩比较小.通常我们最感兴趣的是这样的一个最优化问题:
-		\equSplit{
-			&\min rank(X)\\
-			&\Tst X_{ij}=M_{ij},\forall(i,j)\in\Omega\\
-		}
-		其中$X,M\in\Real{p\times q}$,$\Omega$是已知元素的下标$(i,j)$构成的集合,$\abs{\Omega}=m$.
-
-		\p在一些情况下,(1.1)等价于线性约束问题:
-		\equSplit{
-			&\min\s rank(X)\\
-			&\Tst \mathcal{A}(X)=b\\
-		}
-		其中$b=(b_1,\cdots,b_m)\in\Real{m}$,
-		$\mathcal{A}:\Real{p\times q}\rightarrow\Real{m}$是线性算子,
-		$\Ma(X)=(\inprod{A_1,X},\cdots,\inprod{A_m,X})$,
-		$A_i\in\Real{p\times q},\forall i=1,\cdots,m$,
-		$\inprod{A,X}$是矩阵内积,
-		\p在此给出线性算子$\Ma$的共轭算子的定义:
-		$\Ma^*:\Real{m}\rightarrow\Real{p\times q}$,
-		$\Ma^*(y)=\sum^m_{i=1}y_iA_i,\forall y=(y_1,\cdots,y_m)\in\Real{m}$.
-		容易验证$\Ma$和$\Ma^*$是well-defined,即
-		\[
-			\inprod{\Ma(X),y}=\inprod{(\inprod{A_i,X}),(y_i)}=
-			\sum^m_{i=1}y_i\inprod{A_i,X}=\inprod{\sum^m_{i=1}y_iA_i,X}
-			=\inprod{\Ma^*(y),X}=\inprod{X,\Ma^*(y)}
-		\]
-
-		\p但是(1.1),(1.2)都是\b{"NP-难"}的,因此需要一定的转化.这里我们用核范数来近似矩阵的秩,把(1.1)与(1.2)转化为以下形式:
-
-		\equSplit{
-			&\min\s\nunorm\\
-			&\Tst \mathcal{A}(X)=b\\	
-		}
-
-		\equSplit{
-			&\min\s\nunorm\\
-			&\Tst X_{ij}=M_{ij},\forall(i,j)\in\Omega\\
-		}
-
-		\p很自然的,一个重要的问题是:(1.1)与(1.3),或者(1.2)与(1.4)什么时候等价?略过证明,直接描述以下重要的结论:
-		\p对于(1.3),Candes和陶哲轩等给出了一个证明.当在某些条件下,若已知元素个数$\abs{\Omega}=m=O(nr\cdot polylog(n))$,其中$n=max(p,q)$, $polylog$是多重对数函数,则矩阵有很高概率可以通过(1.3)恢复.
-		\p对于(1.4),Recht等给出了一个证明.将线性映射$\mathcal{A}$的矩阵形式记作$A$,即$\mathcal{A}(X)=A\text{vec}(X)$,其中$\text{vec}(X)\in\Real{pq}$为矩阵$X$的向量化.当$A$是一个随机高斯矩阵,若向量$b$的维数$m\geq C(r(p+q)log(pq)$,其中$C$是一个正的常数,则矩阵有很高概率可以通过(1.4)恢复.
-		\p实际上,由线性代数知识容易知道,(1.4)要求的线性约束条件并不总能成立,因此有时需要适当松弛.考虑(1.4)的罚函数:
-		\equ{\min\s\nunorm+\frac{1}{2\mu}\norm{\mathcal{A}(X)-b}_2^2}
-		其中$\mu$是某个给定常数.
-		\p下面,将对(1.3),(1.4),(1.5)分别给出一种高效的解法.
-
-	\sect{交替方向增广Lagrange法}
-		%\p对于问题(1.4),我们考虑它的Lagrange函数
-		%\equ{L(x,y)=\nunorm+y^\top(\Ma(X)-b),y\in\Real{m}}
-		\p对于问题(1.3),我们考虑它的对偶问题
-		\equSplit{
-			\max_{y\in\Real{m}}\s&b^\top y\\
-			\Tst&\norm{\Ma^*(y)}_2\leq1\\
-		}
-
-		\p引入一个形式上的变量$S$,将(2.1)变为如下的等价形式
-		\equSplit{
-			\min_{y\in\Real{m}}\s&-b^\top y\\
-			\Tst&\Ma^*(y)-S=0\\
-			&\norm{S}_2\leq1\\
-		}
-
-		\p可以考虑(2.2)的增广Lagrange函数
-		\equ{L(y,S,X,\mu)=-b^\top y+\inprod{X,\Ma^*(y)-S}+\frac{1}{2\mu}\norm{\Ma^*(y)-S}^2_F}
-		其中$X\in\Real{p\times q}$是某个给定的矩阵(不同于原问题中的$X$),$\norm{\cdot}_F$是矩阵的\b{$F$-范数},定义为矩阵所有元素的平方和的平方根.
-
-		\p由此我们得到(2.1)的一个等价问题
-		\equSplit{
-			\min_{y,S}\s&L(y,S,X,\mu)\\
-			\Tst&\norm{S}_2\leq1\\
-		}
-		通过选取最佳的$\mu$和$X$可以求出(2.4)的最优解.
-
-		\p采用如下的迭代过程以求解问题(2.4)
-		\equAlign{
-			&(y^{k+1},S^{k+1})=\arg\min_{y,S}L(y,S,X^k,\mu^k)\\
-			&\mu^{k+1}\in[\alpha\mu^k,\mu^k],\alpha\in(0,1)\\
-			&X^{k+1}=X^k+\frac{\Ma^*(y^{k+1})-S^{k+1}}{\mu^k}
-		}
-
-		\p但(2.5)并不容易解得,因此我们考虑使用交替方向法来求解这个方程,即
-		\equAlign{
-			&y^{k+1}=\arg\min_{y,S}L(y,S^k,X^k,\mu^k)\\
-			&S^{k+1}=\arg\min_{y,S}L(y^{k+1},S,X^k,\mu^k)
-		}
-		$\mu^{k+1}$和$X^{k+1}$的求法不变.
-
-		\p首先来求解(2.8)
-		\equ{L(y,S^k,X^k,\mu^k)=-b^\top y+\Ma(X^k)^\top y-\inprod{X,S^k}+\frac{1}{2\mu^k}\norm{\Ma^*(y)-S^k}^2_F}
-
-		记$T=\Ma^*(y)-S^k,\Ma_{ij}=(A_{1_{ij}},\cdots,A_{m_{ij}})\in\Real{m}$,
-		考虑$\norm{T}^2_F$对y的梯度
-		\[\norm{T}^2_F=\sum_{i,j}((\sum^m_{k=1}y_kA_{k_{ij}})-S^k_{ij})^2=\sum_{i,j}(\Ma_{ij}^\top y-S^k_{ij})^2\]
-
-		则
-		\equ{
-			\begin{aligned}
-				\partD{\norm{T}^2_F}{y} & =\partD{\sum_{i,j}(\Ma_{ij}^\top y-S^k_{ij})^2}{y}=\sum_{i,j}\partD{(\Ma_{ij}^\top y-S^k_{ij})^2}{y} \\
-										& =2\sum_{i,j}(\Ma_{ij}^\top y-S^k_{ij})\Ma_{ij}=2(\sum_{i,j}T_{ij}A_{k_{ij}})=2(\inprod{A_i,T})       \\
-										& =2\Ma(\Ma^*(y)-S^k)
-			\end{aligned}
-		}
-		\p由(2.11)可以给出梯度
-		\equ{
-			\partD{L(y,S^k,X^k,\mu^k)}{y}=-b+\Ma(X^k)+\frac{1}{\mu^k}\Ma(\Ma^*(y)-S^k)
-		}
-
-		\p令(2.12)式等于0,可得
-		\equ{y^{k+1}=\mu^k(b-\Ma(X^k))+\Ma(S^k)}
-
-		\p再考虑(2.9).将(2.10)如下变形
-		\equSplit{
-			L(y^{k+1},S,X^k,\mu^k)&=-b^\top y^{k+1}+\Ma(X^k)^\top y^{k+1}-\inprod{X,S}+\frac{1}{2\mu^k}\norm{\Ma^*(y^{k+1})-S}^2_F\\
-			&=\frac{1}{2\mu^k}(\norm{S}_F^2-2\inprod{Y,S}+\norm{\Ma^*(y^{k+1})}_F^2)-b^\top y^{k+1}+\Ma(X^k)^\top y^{k+1}\\
-		}
-		其中$Y=\Ma^*(y^{k+1})+\mu^kX^k$.
-
-		\equ{
-			\partD{L(y^{k+1},S,X^k,\mu^k)}{S}=\frac{1}{2\mu^k}(\partD{\norm{S}_F^2}{S}-2\partD{\inprod{Y,S}}{S})=\frac{S-Y}{\mu^k}
-		}
-
-		\p令(2.15)式等于0,则可得$S^{k+1}=Y$,但由约束条件$\norm{S}_2\leq1$,需对$Y$进行修正,即
-
-		\equ{S^{k+1}=UDiag(min\{\sigma,1\})V^\top}
-		其中$Y=UDiag(\sigma)V^\top$.根据$Y$的定义,可以简化$X^{K+1}$的计算方法
-		\equ{X^{K+1}=\frac{\mu^kX^k+\Ma^*(y^{k+1})-S^{k+1}}{\mu^k}=\frac{Y-S^{k+1}}{\mu^k}}
-
-		\p重复进行上述迭代,到目标精度停止,下面给出相应算法
-
-		\begin{algo}
-			\s\\
-			步1\s给出$\mu^0,X^0,y^0,S^0,\epsilon,\alpha$,设置计数器$k=0$;\\
-			步2\s若$\frac{\norm{X^{k+1}-X^k}_F}{\max\{1,\norm{X^k}_F\}}\leq\epsilon$,则停止;\\
-			步3\s计算$y^{k+1}=\mu^k(b-\Ma(X^k))+\Ma(S^k)$;\\
-			步4\s计算$Y=\Ma^*(y^{k+1})+\mu^kX^k$,并计算其SVD:$Y=UDiag(\sigma)V^\top$;\\
-			步5\s计算$S^{k+1}=UDiag(min\{\sigma,1\})V^\top$;\\
-			步6\s计算$X^{K+1}=\frac{Y-S^{k+1}}{\mu^k}$;\\
-			步7\s计算$\mu^{k+1}=\alpha\mu^k$,$k=k+1$,转步2;
-		\end{algo}
-
-	\sect{RBR法}
-		\p对于问题(1.4),我们可以考虑把它转化为一个半定规划(SDP)问题.
-
-		\p一个标准的半定规划问题是
-		\equSplit{
-			\min_{X\in S^n}\s&\inprod{C,X}\\
-			\Tst&\Ma(X)=b,X\succ0}
-		其中$b\in\Real{m},\Ma(X)=(\inprod{A_1,X},\cdots,\inprod{A_m,X})$,$C,A_i\in S^n$,$S^n$是全体对称矩阵.
-
-		\p对于一个对称正定矩阵$X\in S^n$,我们可以把它写成分块矩阵的形式
-		\equ{
-			X=\pMa{\xi&y^\top\\ y&B}
-		}
-		其中$\xi\in\Real{},y\in\Real{n-1},B\in S^{n-1}$.
-
-		\p容易验证的,$X$可以表示为以下形式
-		\equ{
-			X=\pMa{1&y^\top B^{-1}\\0&I}\pMa{\xi-y^\top B^{-1}y&0\\0&B}\pMa{1&0\\B^{-1}y&I}
-		}
-		记$(X/B)=\xi-y^\top B^{-1}y$,称为X对于B的Schur补.
-
-		\p显然的,\equ{X\succeq0\Leftrightarrow B\succeq0,(X/B)\geq0}
-
-		\p约定以下记号
-		\equ{
-			X_{\alpha,\beta}=
-			\begin{cases}
-				x_{\alpha\beta}
-				&\alpha,\beta\in\Real{}\\
-				(x_{\alpha\beta_1},\cdots,x_{\alpha\beta_n})
-				&\alpha\in\Real{},\beta=\{\beta_1,\cdots,\beta_n\}\\
-				(x_{\alpha_1\beta},\cdots,x_{\alpha_m\beta})^\top
-				&\alpha=\{\alpha_1,\cdots,\alpha_n\},\beta\in\Real{}\\
-				\pMa{
-				x_{\alpha_1\beta_1} & \cdots & x_{\alpha_1\beta_n} \\
-				\cdots              & \cdots & \cdots              \\
-				x_{\alpha_m\beta_1} & \cdots & x_{\alpha_m\beta_n}
+		\subsection{数学模型}
+			\paragraph{}
+				\quad 显而易见, 补全一个完全随机的矩阵几乎是不可能的, 也是意义不大的. 一般情况下, 我们认为所需要补全的矩阵是有一定规律的, 也就是说, 这个矩阵的秩比较小. 通常我们最感兴趣的是这样的一个最优化问题:
+				\equSplit{\label{q1}
+					\min \quad & rank(X)\\
+					\Tst & X_{ij}=M_{ij},\forall(i,j)\in\Omega\\
 				}
-				&\alpha=\{\alpha_1,\cdots,\alpha_n\},\beta=\{\beta_1,\cdots,\beta_n\}
-			\end{cases}
-		}
-		\equ{i^c=\{1,\cdots,n\}\backslash\{i\}=\{1,\cdots,i-1,i+1,\cdots,n\}}
+				其中 $X, M\in\Real{p\times q}$ , $\Omega$ 是已知元素的下标 $(i, j)$ 构成的集合, $\abs{\Omega} = m$ .
 
-		\p令$X=\pMa{\xi&y^\top\\ y&B}=\pMa{X_{i,i}&X_{i,i^c}\\X_{i^c,i}&X_{i^c,i^c}}$,
-		等号在相差一个初等变化下成立.基于(3.4),
-		令$i$取遍$\{1,\cdots,n\}$,逐行解如下的SOCP问题来解决SDP问题(3.1)
+			\paragraph{}
+				\quad 在一些情况下, (\ref{q1})等价于线性约束问题:
+				\equSplit{\label{q2}
+					\min \quad & rank(X)\\
+					\Tst & \mathcal{A}(X)=b\\
+				}
+				其中$b = (b_1, \cdots, b_m)\in\Real{m}$ ,
+				$\mathcal{A}: \Real{p \times q} \rightarrow \Real{m}$ 是线性算子,
+				$\Ma(X) = (\inprod{A_1, X}, \cdots, \inprod{A_m, X})$ ,
+				$A_i \in \Real{p \times q}, \forall i = 1, \cdots, m$ ,
+				$\inprod{A, X}$ 是矩阵内积,
 
-		\equSplit{
-			\min_{[\xi;y]\in\Real{n}}\s&\bar{c}^\top\pMa{\xi\\y}\\
-			\Tst&\bar{X}\pMa{\xi\\y}=\bar{b},\\
-			&(X/B)\geq\delta
-		}
+			\paragraph{}
+				\quad 在此给出线性算子 $\Ma$ 的共轭算子的定义:
+				$\Ma^*: \Real{m} \rightarrow \Real{p \times q}$ ,
+				$\Ma^*(y) = \sum^m_{i = 1}y_i A_i, \forall y = (y_1, \cdots, y_m) \in \Real{m}$ .
+				容易验证 $\Ma$ 和 $\Ma^*$ 是well-defined, 即
+				\[
+					\inprod{\Ma(X), y}=\inprod{(\inprod{A_i, X}), (y_i)} = 
+					\sum^m_{i = 1}y_i \inprod{A_i, X} = \inprod{\sum^m_{i = 1}y_i A_i, X}
+					= \inprod{\Ma^*(y), X} = \inprod{X, \Ma^*(y)}
+				\]
 
-		其中
-		\equSplit{
-			\bar{c}=\pMa{C_{i,i}\\2C{i^c,i}},\s
-			\bar{X}=\pMa{X^(1)_{i,i}&2X^(1)_{i,i^c}\\\cdots&\cdots\\X^(m)_{i,i}&X^(m)_{i,i^c}},\s
-			\bar{b}=\pMa{b_1-\inprod{X^(1)_{i^c,i^c},B}\\\cdots\\b_m-\inprod{X^(m)_{i^c,i^c},B}}
-		}
-		若$X$是半正定的,即$X\succeq0$,取$\delta=0$;若X是正定的,即$X\succ0$,用大于零的数来限制Schur补,取$\delta>0$
+			\paragraph{}
+				\quad 但是(\ref{q1}), (\ref{q2})都是\b{"NP-难"}的, 因此需要一定的转化. 这里我们用核范数来近似矩阵的秩, 把(\ref{q1})与(\ref{q2})转化为以下形式:
+				\equSplit{\label{q3}
+					\min \quad & \nunorm\\
+					\Tst & \mathcal{A}(X)=b\\	
+				}
+				\equSplit{\label{q4}
+					\min \quad & \nunorm\\
+					\Tst & X_{ij}=M_{ij},\forall(i,j)\in\Omega\\
+				}
 
-		\p这种逐行求解的方法就是RBR方法.
+			\paragraph{}
+				\quad 很自然的, 一个重要的问题是: (\ref{q1})与(\ref{q3}), 或者(\ref{q2})与(\ref{q4})什么时候等价? 略过证明, 直接描述以下重要的结论:
 
-		\p考虑(3.7)的Powell罚函数
-		\equ{
-			F(X,\theta,\mu)=\bar{c}^\top\pMa{\xi\\y}+\frac{1}{2\mu}\norm{\bar{X}[\xi;y]-\bar{b}-\theta}^2_2
-		}
-		其中$\theta\in\Real{m}$,$\mu>0$是给定常数.记$\lambda=\theta+\bar{b}$
+			\paragraph{}
+				\quad 对于(\ref{q3}), Candes和陶哲轩等给出了一个证明. 当在某些条件下, 若已知元素个数 $\abs{\Omega} = m = O(nr \cdot polylog(n))$ , 其中 $n=max(p,q)$ , $polylog$ 是多重对数函数, 则矩阵有很高概率可以通过(\ref{q3})恢复.
 
-		\p(3.7)等价于以下问题
-		\equSplit{
-			\min_{X}\s&F(X,\lambda,\mu)=\bar{c}^\top\pMa{\xi\\y}+\frac{1}{2\mu}\norm{\bar{X}[\xi;y]-\lambda}^2_2\\
-			\Tst&X\succeq0
-		}
+			\paragraph{}
+				\quad 对于(\ref{q4}), Recht等给出了一个证明. 将线性映射 $\mathcal{A}$ 的矩阵形式记作 $A$ , 即 $\mathcal{A}(X) = A\text{vec}(X)$ , 其中 $\text{vec}(X) \in \Real{pq}$ 为矩阵 $X$ 的向量化. 当 $A$ 是一个随机高斯矩阵, 若向量 $b$ 的维数 $m \ge C(r(p + q)log(pq)$ , 其中 $C$ 是一个正的常数, 则矩阵有很高概率可以通过(\ref{q4})恢复.
 
-		\p回头考虑(1.4).当$X\in S^n$对称正定,有$\nunorm=tr(X)$,(1.4)等价于下面的SDP问题
-		\equSplit{
-			\min_X\s&tr(X)=\inprod{E,X}\\
-			\Tst&X_{ij}=M_{ij},\forall(i,j)\in\Omega
-		}
-		\p当$X\in\Real{p\times q}$不是对称正定的,可以一个更大的对称正定矩阵$W$.当补全了$W$,则$X$自然被补全了(当然,当$X$是对称正定矩阵时,我们也可以这么做)
-		\equSplit{
-			\min_X\s&tr(X)\\
-			\Tst&X=\pMa{X_1&W\\W^\top&X_2}\succ0\\
-			&W_{ij}=M_{ij},\forall(i,j)\in\Omega
-		}
-		其中$X\in S^{n},n=p+q,W_1\in S^p,W_2\in S^q$,$X,W_1,W_2\succ \delta$.
+			\paragraph{}
+				\quad 实际上, 由线性代数知识容易知道, (\ref{q4})要求的线性约束条件并不总能成立, 因此有时需要适当松弛. 考虑(\ref{q4})的罚函数:
+				\equ{\label{q5}
+					\min \quad \nunorm+ \frac{1}{2\mu} \norm{\mathcal{A}(X) - b}_2^2
+				}
+				其中 $\mu$ 是某个给定常数.
 
-		\p我们主要讨论一般的情况,即问题(3.12).采用RBR法,对于某个i,我们把向量$y$分为两个部分,即
-		\equ{y=\pMa{y_1\\y_2},\s y_1=X_{\alpha_i,i},y_2=X_{\beta_i,i}}
-		其中
-		$\alpha_i=
-		\begin{cases}
-			\{j+p\vert(i,j\in\Omega)\},i\leq p   \\
-			\{j\vert(j,i-p)\in\Omega\},p<i\leq n
-		\end{cases}
-		,\s
-		\beta_i=\{1,\cdots,p\}\backslash(\alpha_i\cup\{i\})$,$y_1$是$X$第$i$列除去第$i$行后所有已知元素构成的列向量,$y_2$是$X$第$i$列除去第$i$行后所有未知元素构成的列向量.
-		\p相应的,$B=\pMa{X_{\alpha_i,\alpha_i}&X_{\alpha_i,\beta_i}\\X_{\beta_i,\alpha_i}&X_{\beta_i,\beta_i}}$,$\s\xi=X_{i,i}$.同时,可以给出$\bar{X}\pMa{\xi\\y}, \lambda $和$\bar{c}$的显式表达
-		\equ{
-			\lambda =\begin{cases}
-			(M_{i,\alpha_i-p})^\top,&i\leq p\\
-			M_{\alpha_i,i-p}\;,&p<i\leq n
-			\end{cases},\s
-			\bar{X}\pMa{\xi\\y}=y_1,
-			\bar{c}=(1,\overbrace{0,\cdots,0}^{n-1})
-		}
+			\paragraph{}
+				\quad 下面, 将对(\ref{q3}), (\ref{q4}), (\ref{q5})分别给出一种高效的解法.
 
-		\p故(3.10)化为以下形式
-		\equSplit{
-			\min\s&\xi+\frac{1}{2\mu}\norm{y_1-\lambda}^2_2\\
-			\Tst&\xi-y^\top B^{-1}y\geq \delta
-		}
+	\section{交替方向增广Lagrange法}
+		\subsection{问题转化}
+			\paragraph{}
+				\quad 对于问题(\ref{q3}), 我们考虑它的对偶问题
+				\equSplit{\label{dual1}
+					\max_{y \in \Real{m}} \quad & b^\top y\\
+					\Tst & \norm{\Ma^*(y)}_2 \le 1\\
+				}
 
-		\paragraph{}\quad 容易发现, 当 $\xi = y^\top B^{-1}y + \delta$ 时, 才可能取到最小值, 则这个问题等价于 
-			\begin{equation}
-				\min_y y^\top B^{-1}y + \frac{1}{2\mu} \norm{y_1-\lambda}^2_2
-			\end{equation}
-			显示表达为 
-			\begin{equation}
-				{\begin{pmatrix}
-					X_{\alpha, \alpha} & X_{\alpha, \beta}\\
-					X_{\beta, \alpha} & X_{\beta, \beta}
-				\end{pmatrix}}^{-1}
-				\begin{pmatrix}
-					y_1 \\ y_2
-				\end{pmatrix}
-				+ \frac{1}{2\mu}
-				\begin{pmatrix}
-					y_1 - \lambda \\ 0
-				\end{pmatrix}
-				= 0
-			\end{equation}
-			变形可得 
-			\begin{equation}
-				\begin{pmatrix}
-					y_1 \\ y_2
-				\end{pmatrix}
-				+ \frac{1}{2\mu}
-				\begin{pmatrix}
-					X_{\alpha, \alpha} \\ X_{\beta, \alpha}
-				\end{pmatrix}
-				(y_1 - \lambda) = 0
-			\end{equation}
-			则 
-			\begin{equation}
-				\begin{split}
-					y_1 = & (2 \mu I + X_{\alpha, \alpha})^{-1} X_{\alpha, \alpha}\\
-					y_2 = & \frac{1}{2\mu} X_{\beta, \alpha} (y_1 - \lambda)
-				\end{split}
-			\end{equation}
-			那么由(3.17)和(3.19), 有
-			\begin{equation}
-				\xi = y^\top B^{-1}y + \delta = 
-				- \frac{1}{2\mu}
-				\begin{pmatrix}
-					y_1 \\ y_2
-				\end{pmatrix}^\top
-				\begin{pmatrix}
-					y_1 - \lambda \\ 0
-				\end{pmatrix}
-				+ \delta = 
-				\frac{1}{2 \mu} y_1^\top (\lambda - y_1) + \delta
-			\end{equation}
-			
-			
-		\paragraph{}\quad 即我们证明了, (3.15)的最优解为:
-			\equSplit{
-				y_1 = & (2 \mu I + X_{\alpha, \alpha})^{-1} X_{\alpha, \alpha}\tilde{b}\\
-				y_2 = & \frac{1}{2 \mu} X_{\beta, \alpha} (\lambda - y_1)\\
-				\xi = & \frac{1}{2 \mu} y_1^\top (\lambda - y_1) + \delta
+			\paragraph{}
+				\quad 引入一个形式上的变量 $S$ , 将(\ref{dual1})变为如下的等价形式
+				\equSplit{\label{dual2}
+					\min_{y \in \Real{m}} & -b^\top y\\
+					\Tst & \Ma^*(y) - S = 0\\
+					&\norm{S}_2 \le 1\\
+				}
+
+			\paragraph{}
+				\quad 可以考虑(\ref{dual2})的增广Lagrange函数
+				\equ{\label{Lag}
+					L(y, S, X, \mu) = -b^\top y + \inprod{X, \Ma^*(y) - S} + \frac{1}{2\mu} \norm{\Ma^*(y) - S}^2_F
+				}
+				其中 $X \in \Real{p \times q}$ 是某个给定的矩阵(不同于原问题中的 $X$ ), $\norm{\cdot}_F$ 是矩阵的 $F-$范数.
+
+			\paragraph{}
+				\quad 由此我们得到(\ref{dual1})的一个等价问题
+				\equSplit{\label{dualQ}
+					\min_{y,S} \quad & L(y, S, X, \mu)\\
+					\Tst & \norm{S}_2 \le 1\\
+				}
+				通过选取最佳的 $\mu$ 和 $X$ 可以求出(\ref{dualQ})的最优解.
+		
+		
+			\paragraph{}
+				\quad 采用如下的迭代过程以求解问题(\ref{dualQ})
+				\equSplit{\label{dualA}
+						\mu^{k + 1}
+					\in	& [\alpha \mu^k, \mu^k], \quad \alpha \in (0,1)\\
+						X^{k + 1}
+					=	& X^k + \frac{\Ma^*(y^{k + 1}) - S^{k + 1}}{\mu^k}\\
+						(y^{k + 1}, S^{k + 1}) 
+					=	& \arg \min_{y, S}L(y, S, X^k, \mu^k)
+				}
+		\subsection{交替方向求解}
+			\paragraph{}
+				\quad 但实际上, (\ref{dualA})并不容易解, 因此我们考虑使用交替方向法来求解这个方程, 即
+				\equAlign{
+						y^{k + 1}
+					=	& \arg \min_{y, S}L(y, S^k, X^k, \mu^k) \label{FixS}\\
+						S^{k + 1}
+					=	& \arg \min_{y, S}L(y^{k + 1}, S, X^k, \mu^k) \label{FixY}
+				}
+				$\mu^{k + 1}$ 和 $X^{k + 1}$ 的求法不变.
+
+			\paragraph{}
+				\quad 首先来求解(\ref{FixS}), 当固定 $S^k$
+				\equ{\label{LagFixS}
+						L(y, S^k, X^k, \mu^k)
+					=	-b^\top y + \Ma(X^k)^\top y - \inprod{X, S^k}+ \frac{1}{2\mu^k} \norm{\Ma^*(y) - S^k}^2_F
+				}
+
+				记 $T = \Ma^*(y) - S^k$ , $\Ma_{ij} = (A_{1_{ij}}, \cdots, A_{m_{ij}}) \in \Real{m}$ ,考虑 $\norm{T}^2_F$
+				\[
+						\norm{T}^2_F
+					=	\sum_{i, j}((\sum^m_{k = 1} y_k A_{k_{ij}}) - S^k_{ij})^2
+					=	\sum_{i, j}(\Ma_{ij}^\top y - S^k_{ij})^2
+				\]
+				则它对y的梯度
+				\equ{
+					\begin{aligned}
+							& \partD{\norm{T}^2_F}{y}\\
+						=	& \partD{\sum_{i, j}(\Ma_{ij}^\top y - S^k_{ij})^2}{y}\\
+						=	& \sum_{i, j}\partD{(\Ma_{ij}^\top y - S^k_{ij})^2}{y} \\
+						=	& 2\sum_{i, j}(\Ma_{ij}^\top y - S^k_{ij}) \Ma_{ij}\\
+						=	& 2(\sum_{i, j}T_{ij} A_{k_{ij}})\\
+						=	& 2(\inprod{A_i, T})\\
+						=	& 2\Ma(\Ma^*(y) - S^k)
+					\end{aligned}
+				}
+
+			\paragraph{}
+				\quad 由此可以给出(\ref{LagFixS})的梯度
+				\equ{\label{GradFixS}
+						\partD{L(y, S^k, X^k, \mu^k)}{y}
+					=	-b + \Ma(X^k) + \frac{1}{\mu^k} \Ma(\Ma^*(y) - S^k)
+				}
+
+			\paragraph{}
+				\quad 令(\ref{GradFixS})式等于0, 可得
+				\equ{\label{dualAY}
+					y^{k + 1} = \mu^k(b - \Ma(X^k)) + \Ma(S^k)
+				}
+
+			\paragraph{}
+				\quad 再考虑(\ref{FixY}). 当固定 $y^k$
+				\equSplit{\label{LagFixY}
+						& L(y^{k + 1},S,X^k,\mu^k)\\
+					=	& -b^\top y^{k + 1} + \Ma(X^k)^\top y^{k + 1} - \inprod{X, S} + \frac{1}{2\mu^k} \norm{\Ma^*(y^{k + 1}) - S}^2_F\\
+					=	& \frac{1}{2\mu^k}(\norm{S}_F^2 - 2\inprod{Y, S} + \norm{\Ma^*(y^{k + 1})}_F^2) - b^\top y^{k + 1} + \Ma(X^k)^\top y^{k + 1}\\
+				}
+				其中 $Y = \Ma^*(y^{k + 1}) + \mu^k X^k$.
+				\equ{\label{GradFixY}
+						\partD{L(y^{k + 1},S,X^k,\mu^k)}{S}
+					=	\frac{1}{2\mu^k}(\partD{\norm{S}_F^2}{S} - 2 \partD{\inprod{Y, S}}{S})
+					=	\frac{S - Y}{\mu^k}
+				}
+
+			\paragraph{}
+				\quad 令(\ref{GradFixY})式等于0, 则可得 $S^{k + 1} = Y$ , 但由约束条件 $\norm{S}_2 \leq 1$ , 需对 $Y$ 进行修正, 即
+				\equ{\label{dualAS}
+					S^{k + 1} = U \text{Diag}(\min \{\sigma, 1\}) V^\top
+				}
+				其中 $Y = U \text{Diag}(\sigma) V^\top$ . 根据 $Y$ 的定义, 可以简化 $X^{k + 1}$ 的计算方法
+				\equ{\label{dualAX}
+						X^{k + 1}
+					=	\frac{\mu^kX^k + \Ma^*(y^{k + 1})-S^{k + 1}}{\mu^k}
+					=	\frac{Y - S^{k + 1}}{\mu^k}
+				}
+
+
+			\paragraph{}
+				\quad 重复进行上述迭代,到目标精度停止,下面给出相应算法
+				\begin{algo}
+					\quad\\
+					步1 \quad 给出 $\mu^0$ , $X^0$ , $y^0$ , $S^0$ , $\epsilon$ , $\alpha$ , 设置计数器 $k=0$ ;\\
+					步2 \quad 若 $\frac{\norm{X^{k + 1} - X^k}_F}{\max \{1, \norm{X^k}_F\}} \leq \epsilon$ , 则停止;\\
+					步3 \quad 计算 $y^{k + 1} = \mu^k (b - \Ma(X^k)) + \Ma(S^k)$ ;\\
+					步4 \quad 计算 $Y = \Ma^*(y^{k + 1}) + \mu^k X^k$ , 并计算其SVD: $Y = U \text{Diag}(\sigma) V^\top$ ;\\
+					步5 \quad 计算 $S^{k + 1} = U \text{Diag}(min \{\sigma, 1\}) V^\top$ ;\\
+					步6 \quad 计算 $X^{k + 1} = \frac{Y - S^{k + 1}}{\mu^k}$ ;\\
+					步7 \quad 计算 $\mu^{k + 1} = \alpha \mu^k$ , $k = k + 1$,转步2.
+				\end{algo}
+
+	\section{RBR法}
+		\subsection{SDP问题与Schur补}
+			\paragraph{}
+				\quad 对于问题(\ref{q4}), 我们可以考虑把它转化为一个半定规划(SDP)问题.
+
+			\paragraph{}
+				\quad 一个标准的半定规划问题是
+				\equSplit{\label{SDP}
+					\min_{X \in S^n} \quad	& \inprod{C, X}\\
+					\Tst					& \Ma(X) = b, X \succ 0}
+				其中 $b \in \Real{m}$ , $\Ma(X) = (\inprod{A_1, X}, \cdots, \inprod{A_m, X})$ , $C, A_i \in S^n$ , $S^n$ 是全体对称矩阵.
+
+			\paragraph{}
+				\quad 对于一个对称正定矩阵 $X \in S^n$ , 我们可以把它写成分块矩阵的形式
+				\equ{
+					X = \pMa{\xi & y^\top \\ y & B}
+				}
+				其中$\xi \in \Real{}$ , $y \in \Real{n-1}$ , $B \in S^{n - 1}$ .
+
+			\paragraph{}
+				\quad 容易验证的, $X$ 可以表示为以下形式
+			\equ{\label{Schur}
+					X 
+				=	\pMa{1 & y^\top B^{-1} \\ 0 & I}
+					\pMa{\xi - y^\top B^{-1} y & 0 \\ 0 & B}
+					\pMa{1 & 0 \\ B^{-1} y & I}
+			}
+			记 $(X/B) = \xi - y^\top B^{-1} y$ , 称为X对于B的Schur补.
+
+			\paragraph{}
+				\quad 显然的
+				\equ{\label{SchurCondition}
+					X \succeq 0 \Leftrightarrow B \succeq 0, (X/B) \geq 0
+				}
+
+		\subsection{SOCP问题}
+			\paragraph{}
+				\quad 约定以下记号
+				\equ{
+						X_{\alpha, \beta}
+					=
+					\begin{cases}
+						x_{\alpha \beta}
+							&\alpha, \beta \in \Real{}\\
+						(x_{\alpha \beta_1}, \cdots, x_{\alpha \beta_n})
+							&\alpha \in \Real{}, \beta = \{\beta_1, \cdots, \beta_n\}\\
+						(x_{\alpha_1 \beta}, \cdots, x_{\alpha_m \beta})^\top
+							&\alpha = \{\alpha_1, \cdots, \alpha_m\}, \beta \in \Real{}\\
+						\pMa{
+							x_{\alpha_1 \beta_1} & \cdots & x_{\alpha_1 \beta_n} \\
+							\cdots & \cdots & \cdots\\
+							x_{\alpha_m \beta_1} & \cdots & x_{\alpha_m \beta_n}
+						}
+							&\alpha = \{\alpha_1, \cdots, \alpha_m\}, \beta = \{\beta_1, \cdots, \beta_n\}
+					\end{cases}
+				}
+				\equ{
+						i^c
+					=	\{1, \cdots, n\} \backslash \{i\}
+					=	\{1, \cdots, i-1, i+1, \cdots, n\}
+				}
+
+			\paragraph{}
+				\quad 令
+				$
+						X
+					=	\pMa{\xi & y^\top \\ y & B}
+					=	\pMa{X_{i, i} & X_{i, i^c} \\ X_{i^c, i} & X_{i^c, i^c}}
+				$,
+				等号在相差一个初等变化下成立. 基于(\ref{SchurCondition}), 令 $i$ 取遍 $\{1, \cdots, n\}$ , 逐行解如下的SOCP问题来解决SDP问题(\ref{SDP})
+
+			\equSplit{\label{SOCP}
+				\min_{[\xi; y] \in \Real{n}} \quad
+					& \bar{c}^\top \pMa{\xi \\ y}\\
+				\Tst
+					& \bar{X} \pMa{\xi \\ y} = \bar{b}\\
+					& (X/B) \geq \delta
 			}
 
-		\paragraph{}\quad 我们可以让 $i$ 循环取遍 $\{1, \cdots, n\}$ , 逐行求解(3.15), 最终解决问题(1.4). 给出算法
-			\begin{algo}
-				\s\\
-				步1\s给出 $\delta \ge 0$ , $X^1 \succ 0$ , $F^0 = tr(X^1)$ , $F^1=+\infty$ , $\epsilon>0$ , 设置计数器 $k=1$ , $i=1$ ;\\
-				步2\s若 $\frac{\abs{F^{k-1}-F^k}}{\max\{1,\abs{F^{k-1}}\}}\leq\epsilon$ , 则停止;\\
-				步3\s若 $i>n$ , 则令 $i=1$ , $X^{k+1}=X^k$ , $k=k+1$ , $F^k = tr(X^k)$ , 转步2;\\
-				步4\s求出 $i$ 对应的 $\alpha_i$ , $\beta_i$;\\
-				步5\s若 $\vert{\alpha_i}\vert$ = 0, 令 $X^k_{\alpha, \alpha} = x^l_{\alpha, \beta} = X^k_{\beta, \alpha} = 0$, $X^k_{\beta, \beta} = X^k$ , 否则按通常定义求出以上几个量.\\
-				步6\s按(3.21), 计算当前最优解 $\xi$, $y_1$, $y_2$ , 以及 $y = [y_1, y_2]$;\\
-				步7\s令 $X^{k}_{i, i}=\xi$ , $X^{k}_{i,i^c} = y$ , $X^{k}_{i^c,i}=y^\top$;\\
-				步7\s$i=i+1$, 转步3;
-			\end{algo}
+			其中
+			\equSplit{\label{SOCPCondition}
+					\bar{c}
+				=	\pMa{C_{i, i} \\ 2C{i^c, i}}, \quad
+					\bar{X}
+				=	\pMa{X^(1)_{i, i} & 2X^(1)_{i, i^c} \\ \cdots & \cdots \\ X^(m)_{i, i} & X^(m)_{i, i^c}}, \quad
+					\bar{b}
+				=	\pMa{b_1 - \inprod{X^(1)_{i^c, i^c}, B} \\ \cdots \\ b_m - \inprod{X^(m)_{i^c, i^c}, B}}
+			}
+			
+			若 $X$ 是半正定的, 即 $X \succeq 0$ , 取 $\delta = 0$; 
+			
+			若 $X$ 是正定的, 即 $X \succ 0$ , 用大于零的数来限制Schur补, 取$\delta > 0$.
 
+		\subsection{Powell罚函数}
+			\paragraph{}
+				\quad 考虑(3.7)的Powell罚函数
+				\equ{\label{Powell}
+						F(X, \theta, \mu)
+					=	\bar{c}^\top \pMa{\xi \\ y} + \frac{1}{2\mu} \norm{\bar{X}[\xi; y] - \bar{b} - \theta}^2_2
+				}
+				其中 $\theta \in \Real{m}$ , $\mu > 0$ 都是是给定的. 记 $\lambda = \theta + \bar{b}$
 
-	\sect{FPCA法}
-		\paragraph{}
-			\quad FPCA法是一种基于不动点定理的算法, 可以解决问题(1.5). 
+			\paragraph{}
+				\quad (\ref{SOCP})等价于以下问题
+				\equSplit{\label{PowellQ}
+					\min_{X} \quad
+						& F(X, \lambda, \mu) = \bar{c}^\top \pMa{\xi \\ y} + \frac{1}{2\mu} \norm{\bar{X}[\xi; y] - \lambda}^2_2\\
+					\Tst
+						& X \succeq 0
+				}
 
-		\paragraph{}
-			\quad $\nunorm+\frac{1}{2\mu}\norm{\mathcal{A}(X)-b}_2^2$ 是一个凸函数, 那么只要求梯度为0的点. 但 $\nunorm$ 是不可微的, 故考虑次梯度, 即要求
+		\subsection{用SDP和RBR法补全矩阵}
+			\paragraph{}
+				\quad 回头考虑(\ref{q4}). 当 $X \in S^n$ 对称正定, 有 $\nunorm = tr(X)$, (\ref{q4})等价于下面的SDP问题
+				\equSplit{\label{RBR}
+					\min_X \quad
+						& tr(X) = \inprod{E, X}\\
+					\Tst
+						& X_{ij} = M_{ij}, \quad \forall(i, j) \in \Omega
+				}
+
+			\paragraph{}
+				\quad 当 $X \in \Real{p \times q}$ 不是对称正定的, 可以考虑一个更大的对称正定矩阵 $W$ . 当补全了 $W$ , 则 $X$ 自然被补全了(当然, 当 $X$ 是对称正定矩阵时, 我们也可以这么做)
+				\equSplit{\label{BigRBR}
+					\min_X \quad
+						& tr(X)\\
+					\Tst
+						& X = \pMa{X_1 & W \\ W^\top & X_2} \succ 0\\
+						& W_{ij} = M_{ij}, \quad \forall(i, j) \in \Omega
+				}
+				其中 $X \in S^{n}$ , $n = p + q$ ,$W_1 \in S^p$ , $W_2 \in  S^q$ , $X, W_1, W_2 \succ \delta$.
+
+			\paragraph{}
+				\quad 我们主要讨论一般的情况, 即问题(\ref{BigRBR}). 采用RBR法, 对于某个 $i$ , 我们把向量 $y$ 分为两个部分, 即
+				\equ{\label{BigRBRCondition1}
+					y = \pMa{y_1 \\ y_2}, \quad
+					y_1 = X_{\alpha_i, i}, \quad
+					y_2 = X_{\beta_i, i}
+				}
+				其中
+				$
+					\alpha_i=
+						\begin{cases}
+							\{j + p \vert (i, j \in \Omega)\}, i \leq p\\
+							\{j \vert (j, i - p) \in \Omega\}, p < i \leq n
+						\end{cases}
+						,\quad
+					\beta_i = 
+						\{1, \cdots, p\} \backslash (\alpha_i \cup \{i\})
+				$,
+				$y_1$ 是 $X$ 第 $i$ 列除去第 $i$ 行后所有已知元素构成的列向量,$y_2$ 是 $X$ 第 $i$ 列除去第 $i$ 行后所有未知元素构成的列向量.
+
+			\paragraph{}
+				\quad 相应的,
+					$
+						B =
+							\pMa{X_{\alpha_i, \alpha_i} & X_{\alpha_i, \beta_i} \\ X_{\beta_i, \alpha_i} & X_{\beta_i, \beta_i}}
+							,\quad 
+						\xi =
+							X_{i, i}
+					$.
+					同时,可以给出 $\bar{X} \pMa{\xi \\ y}, \lambda$ 和 $\bar{c}$ 的显式表达
+			\equ{\label{BigRBRCondition2}
+					\lambda
+				= 	\begin{cases}
+						(M_{i,\alpha_i-p})^\top,&i\leq p\\
+						M_{\alpha_i,i-p}\;,&p<i\leq n
+					\end{cases}
+					, \quad
+					\bar{X} \pMa{\xi\\y}
+				=	y_1
+					, \quad
+					\bar{c}
+				=	(1, \overbrace{0, \cdots, 0}^{n - 1})
+			}
+
+			\paragraph{}
+				\quad 故(\ref{PowellQ})化为以下形式
+			\equSplit{\label{TrueRBRQ}
+				\min \quad
+					& \xi + \frac{1}{2\mu} \norm{y_1 - \lambda}^2_2\\
+				\Tst
+					& \xi - y^\top B^{-1} y \geq \delta
+			}
+
+			\begin{theo}
+				问题(\ref{TrueRBRQ})的最优解为
+				\equSplit{\label{TrueRBRA}
+					y_1 = & (2 \mu I + X_{\alpha, \alpha})^{-1} X_{\alpha, \alpha}\tilde{b}\\
+					y_2 = & \frac{1}{2 \mu} X_{\beta, \alpha} (\lambda - y_1)\\
+					\xi = & \frac{1}{2 \mu} y_1^\top (\lambda - y_1) + \delta
+				}
+			\end{theo}
+
+			\begin{proof}
+				容易发现, 当 $\xi = y^\top B^{-1}y + \delta$ 时, 才可能取到最小值, 则(\ref{TrueRBRQ})等价于
 				\begin{equation}
+					\min_y y^\top B^{-1}y + \frac{1}{2\mu} \norm{y_1-\lambda}^2_2
+				\end{equation}
+				令其梯度为0
+				\begin{equation}\label{GradTrueRBR}
+						{\begin{pmatrix}
+							X_{\alpha, \alpha} & X_{\alpha, \beta}\\
+							X_{\beta, \alpha} & X_{\beta, \beta}
+						\end{pmatrix}}^{-1}
+						\begin{pmatrix}
+							y_1 \\ y_2
+						\end{pmatrix}
+					+	\frac{1}{2\mu}
+						\begin{pmatrix}
+							y_1 - \lambda \\ 0
+						\end{pmatrix}
+					=	0
+				\end{equation}
+				变形可得 
+				\begin{equation}
+						\begin{pmatrix}
+							y_1 \\ y_2
+						\end{pmatrix}
+					+	\frac{1}{2\mu}
+						\begin{pmatrix}
+							X_{\alpha, \alpha} \\ X_{\beta, \alpha}
+						\end{pmatrix}
+						(y_1 - \lambda)
+					=	0
+				\end{equation}
+				则 
+				\begin{equation}
+					\begin{split}\label{TrueRBRAY}
+						y_1 =
+							& (2 \mu I + X_{\alpha, \alpha})^{-1} X_{\alpha, \alpha}\\
+						y_2 =
+							& \frac{1}{2\mu} X_{\beta, \alpha} (y_1 - \lambda)
+					\end{split}
+				\end{equation}
+				那么由(\ref{GradTrueRBR})和(\ref{TrueRBRAY}), 有
+				\begin{equation}\label{TrueRBRAXi}
+						\xi
+					=	y^\top B^{-1}y + \delta
+					= 	- \frac{1}{2\mu}
+						\begin{pmatrix}
+							y_1 \\ y_2
+						\end{pmatrix}^\top
+						\begin{pmatrix}
+							y_1 - \lambda \\ 0
+						\end{pmatrix}
+						+ \delta
+					=	\frac{1}{2 \mu} y_1^\top (\lambda - y_1) + \delta
+				\end{equation}
+				即 (\ref{TrueRBRQ})的最优解为(\ref{TrueRBRA})
+			\end{proof}
+			
+			\paragraph{}
+				\quad 我们可以让 $i$ 循环取遍 $\{1, \cdots, n\}$ , 逐行求解(\ref{TrueRBRQ}), 最终解决问题(\ref{q4}). 给出算法
+				\begin{algo}
+					\quad\\
+					步1 \quad 给出 $\delta \ge 0$ , $X^1 \succ 0$ , $F^0 = tr(X^1)$ , $F^1=+\infty$ , $\epsilon>0$ , 设置计数器 $k=1$ , $i=1$ ;\\
+					步2 \quad 若 $\frac{\abs{F^{k-1}-F^k}}{\max\{1,\abs{F^{k-1}}\}}\leq\epsilon$ , 则停止;\\
+					步3 \quad 若 $i>n$ , 则令 $i=1$ , $X^{k + 1}=X^k$ , $k=k + 1$ , $F^k = tr(X^k)$ , 转步2;\\
+					步4 \quad 求出 $i$ 对应的 $\alpha_i$ , $\beta_i$;\\
+					步5 \quad 若 $\vert{\alpha_i}\vert$ = 0, 令 $X^k_{\alpha, \alpha} = x^l_{\alpha, \beta} = X^k_{\beta, \alpha} = 0$, $X^k_{\beta, \beta} = X^k$ , 否则按通常定义求出以上几个量.\\
+					步6 \quad 按(\ref{TrueRBRA}), 计算当前最优解 $\xi$, $y_1$, $y_2$ , 以及 $y = [y_1, y_2]$;\\
+					步7 \quad 令 $X^{k}_{i, i}=\xi$ , $X^{k}_{i,i^c} = y$ , $X^{k}_{i^c,i}=y^\top$;\\
+					步8 \quad $i=i+1$, 转步3;
+				\end{algo}
+
+
+	\section{FPCA法}
+		\subsection{FPC法}
+			\paragraph{}
+				\quad FPC法是一种基于不动点定理的算法, 可以解决问题(\ref{q5}). 
+
+			\paragraph{}
+				\quad $\nunorm+\frac{1}{2\mu}\norm{\mathcal{A}(X)-b}_2^2$ 是一个凸函数, 求最优解只要求梯度为0的点. 但 $\nunorm$ 是不可微的, 故考虑次梯度, 即
+				\begin{equation}\label{SubGrad}
 					0 \in \mu \partial \nunorm + g(X)
 				\end{equation}
-			其中 $g(X) = \mathcal{A}^*(\mathcal{A}(X) - b)$
-		
-		\paragraph{}
-			\quad 设 $Y = X - \psi g(X)$ , $\psi > 0$ 是给定常数, 则(4.1)等价于
-				\begin{equation}
+				其中 $g(X) = \mathcal{A}^*(\mathcal{A}(X) - b)$
+			
+			\paragraph{}
+				\quad 设 $Y = X - \psi g(X)$ , $\psi > 0$ 是给定常数, 则(\ref{SubGrad})等价于
+				\begin{equation}\label{SubGrad2}
 					0 \in \psi \mu \partial \nunorm + X - (X - \psi g(X)) = \psi \mu \partial \nunorm + X -Y
 				\end{equation}
 
-		\paragraph{}
-			\quad (4.2)恰好是 $\nunorm + \frac{1}{2} \Vert{X - Y}\Vert^2_F$ 的次梯度, 即(1.4)等价于 
+			\paragraph{}
+				\quad (\ref{SubGrad2})恰好是 $\nunorm + \frac{1}{2} \Vert{X - Y}\Vert^2_F$ 的次梯度, 即(\ref{q4})等价于 
+					\begin{equation}\label{FPCQ}
+						\min \psi \mu \nunorm + \frac{1}{2} \Vert{X - Y}\Vert^2_F
+					\end{equation}
+			
+			\paragraph{}
+				\quad 引入矩阵的Shinkage算子, 定义如下
+
+			\begin{define}[Shinkage算子]
+				对 $X \in \Real{m \times n}$ 做奇异值分解, $X = U \text{Diag}(\sigma) V ^\top$ , $r = \text{rank}(X)$ , $U \in \Real{m \times r}$ , $V \in \Real{n \times r}$ , 对 $\forall \nu > 0$ , 定义向量 $\bar{\sigma} = (\bar{\sigma_1}, \cdots, \bar{\sigma_r})$ , 其中$\bar{\sigma_i} = \max \{\sigma_i - \nu, 0\}$ , 那么Shinkage算子定义为 $S_\nu(X) = U \text{Diag}(\bar{\sigma}) V ^\top$
+			\end{define}
+
+			\paragraph{}
+				\quad 当认为(\ref{FPCQ})中的 $Y$ 是给定的情况下, 有如下定理
+			\begin{theo}
+				(\ref{FPCQ})的最优解为 $S_{\psi \mu}(Y)$, 其中 $S_{\psi \mu}(\cdot)$ 是Shinkage算子
+			\end{theo}
+			
+			\begin{proof}
+				\quad 不失一般性, 设 $m \le n$ , 记 $\nu = \psi \mu$ , $X = U \text{Diag}(\sigma) V ^\top$ , $Y = U_Y \text{Diag}(\gamma) V_Y ^\top$ 是 $X$ , $Y$ 的SVD, $\text{rank} X = r$ , $\text{rank} Y = t$.
+			
+				因为 $\partial \Vert{X}\Vert_* = \{UV^\top+W\vert U^\top W=0,WV=0,\norm{W}_2\leq1\}$ , 找到矩阵 $\bar{U} \in \Real{m \times (m - r)}$ , $\bar{V} \in \Real{n \times (n - r)}$ , 使得 $\tilde{U} = [U, \bar{U}]$ , $\tilde{V} = [V, \bar{V}]$ 分别是 $m$ , $n$ 阶正交矩阵. 那么易验证, 当 $\bar{\sigma} \in \Real{m-r}_+$ , $\Vert{\sigma}\Vert_\infty \le 1$ , 形如 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ 的矩阵 $W \in \partial \Vert{X}\Vert_*$ .
+
+				若 $0 \in \nu \partial \nunorm + X -Y$ , 则说明 $\exists W \in \partial \nunorm$ 使 $\nu (UV ^\top + W) + X -Y = 0$ . 那么可以看到当 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ , 则要求
 				\begin{equation}
-					\min \psi \mu \nunorm + \frac{1}{2} \Vert{X - Y}\Vert^2_F
-				\end{equation}
-
-		\paragraph{}
-			\quad 当认为 $Y$ 是给定的情况下, 该问题的解为 $S_{\psi \mu}(Y)$, 其中 $S_{\psi \mu}(Y)$ 是Shinkage算子, 定义如下
-		
-		\paragraph{}
-			\quad 对 $X \in \Real{m \times n}$ 做奇异值分解, $X = U \text{Diag}(\sigma) V ^\top$ , $r = \text{rank}(X)$ , $U \in \Real{m \times r}$ , $V \in \Real{n \times r}$ , 对 $\forall \nu > 0$ , 定义向量 $\bar{\sigma} = (\bar{\sigma_1}, \cdots, \bar{\sigma_r})$ , 其中$\bar{\sigma_i} = \max \{\sigma_i - \nu, 0\}$ , 那么Shinkage算子定义为 $S_\nu(X) = U \text{Diag}(\bar{\sigma}) V ^\top$
-
-		\paragraph{}
-			\quad 不失一般性, 设 $m \le n$ , 记 $\nu = \psi \mu$ , $X = U \text{Diag}(\sigma) V ^\top$ , $Y = U_Y \text{Diag}(\gamma) V_Y ^\top$ 是 $X$ , $Y$ 的SVD, $\text{rank} X = r$ , $\text{rank} Y = t$.
-		
-			因为 $\partial \Vert{X}\Vert_* = \{UV^\top+W\vert U^\top W=0,WV=0,\norm{W}_2\leq1\}$ , 找到矩阵 $\bar{U} \in \Real{m \times (m - r)}$ , $\bar{V} \in \Real{n \times (n - r)}$ , 使得 $\tilde{U} = [U, \bar{U}]$ , $\tilde{V} = [V, \bar{V}]$ 分别是 $m$ , $n$ 阶正交矩阵. 那么易验证, 当 $\bar{\sigma} \in \Real{m-r}_+$ , $\Vert{\sigma}\Vert_\infty \le 1$ , 形如 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ 的矩阵 $W \in \partial \Vert{X}\Vert_*$ .
-
-			若 $0 \in \nu \partial \nunorm + X -Y$ , 则说明 $\exists W \in \partial \nunorm$ 使 $\nu (UV ^\top + W) + X -Y = 0$ . 那么可以看到当 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ , 则要求
-				\begin{equation}
-					\begin{split}
+					\begin{split}\label{ShinkageCondition}
 							&\nu (UV ^\top + W) + X -Y\\
 						=	&(\nu U I V ^\top + \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top + U \text{Diag}(\sigma) V ^\top) - Y\\
 						=	&\begin{pmatrix}
@@ -453,231 +591,302 @@
 					\end{split}
 				\end{equation}
 
-			当 $\gamma_1 \ge \cdots \ge \gamma_t \ge \nu$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = t$ , $U = U_Y$ , $V = V_Y$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_t - \nu)$ , 对于这样的 $X$ , 取 $\bar{\sigma} = 0$ 即 $W = 0$ , (4.4)成立.
+				当 $\gamma_1 \ge \cdots \ge \gamma_t \ge \nu$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = t$ , $U = U_Y$ , $V = V_Y$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_t - \nu)$ , 对于这样的 $X$ , 取 $\bar{\sigma} = 0$ 即 $W = 0$ , (\ref{ShinkageCondition})成立.
 
-			当 $\gamma_1 \ge \cdots \ge \gamma_k \ge \nu \ge \gamma_{k+1} \ge \cdots \ge \gamma_t$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = k$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_k - \nu, 0, \cdots, 0)$ , 对这样的 $X$ , 取 $\bar{\sigma} = (\gamma_{k+1}/\nu, \cdots, \gamma_{t}/\nu, 0, \cdots, 0)$ , 同时令 $\bar{U}$ 的前 $t - k$ 行依次为 $U_Y$ 的 $k + 1$ 至 $t$ 行, $\bar{V}$ 的前 $t - k$ 行依次为 $V_Y$ 的 $k + 1$ 至 $t$ 行, 即 
-				$
-					\begin{pmatrix}
-						U \\ \bar{U}
-					\end{pmatrix} 
-					=
-					\begin{pmatrix}
-						U_Y \\ \bar{U}'
-					\end{pmatrix}
-				$ ,
-				$
-					\begin{pmatrix}
-						V \\ \bar{V}
-					\end{pmatrix} 
-					=
-					\begin{pmatrix}
-						V_Y \\ \bar{V}'
-					\end{pmatrix}
-				$ ,
-			其中 $\bar{U}'$ 是 $\bar{U}$ 的后 $m - t$ 行, $\bar{V}'$ 是 $\bar{V}$ 的后 $n - t$ 行, 此时(4.4)也成立.
+				当 $\gamma_1 \ge \cdots \ge \gamma_k \ge \nu \ge \gamma_{k + 1} \ge \cdots \ge \gamma_t$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = k$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_k - \nu, 0, \cdots, 0)$ , 对这样的 $X$ , 取 $\bar{\sigma} = (\gamma_{k + 1}/\nu, \cdots, \gamma_{t}/\nu, 0, \cdots, 0)$ , 同时令 $\bar{U}$ 的前 $t - k$ 行依次为 $U_Y$ 的 $k + 1$ 至 $t$ 行, $\bar{V}$ 的前 $t - k$ 行依次为 $V_Y$ 的 $k + 1$ 至 $t$ 行, 即 
+					$
+						\begin{pmatrix}
+							U \\ \bar{U}
+						\end{pmatrix} 
+						=
+						\begin{pmatrix}
+							U_Y \\ \bar{U}'
+						\end{pmatrix}
+					$ ,
+					$
+						\begin{pmatrix}
+							V \\ \bar{V}
+						\end{pmatrix} 
+						=
+						\begin{pmatrix}
+							V_Y \\ \bar{V}'
+						\end{pmatrix}
+					$ ,
+				其中 $\bar{U}'$ 是 $\bar{U}$ 的后 $m - t$ 行, $\bar{V}'$ 是 $\bar{V}$ 的后 $n - t$ 行, 此时(\ref{ShinkageCondition})也成立.
 
-			故 $S_{\psi \mu}(Y)$ 是(4.3)的解.
-		
-		\paragraph{}
-			\quad 也就是说, 我们只需要求出合适的 $Y$ , $S_{\psi \mu}(Y)$ 就是(1.5)的解. 由 $X$ 与 $Y$ 的关系可以看出, 若 $X^*$ 是(1.5)的解, 则
+				故 $S_{\psi \mu}(Y)$ 是(\ref{FPCQ})的解.
+			\end{proof}
+		\subsection{FPC法的收敛性}
+			\paragraph{}
+				\quad 也就是说, 我们只需要求出合适的 $Y$ , $S_{\psi \mu}(Y)$ 就是(\ref{q5})的解. 由 $X$ 与 $Y$ 的关系可以看出, 若 $X^*$ 是(\ref{q5})的解, 则
 				\begin{equation}
-					X^* = S_{\psi \mu}(X^* - \mu g(X^*)) = S_{\psi \mu}(X^* - \mu \mathcal{A}^*(\mathcal{A}(X^*) - b))
+						X^*
+					=	S_{\psi \mu}(X^* - \mu g(X^*))
+					=	S_{\psi \mu}(X^* - \mu \mathcal{A}^*(\mathcal{A}(X^*) - b))
 				\end{equation}
-			即 $X^*$ 是映射 $S_{\psi \mu} \circ h$ 的不动点, 其中 $h(X) = X - \mu g(X)$ .
+				即 $X^*$ 是映射 $S_{\psi \mu} \circ h$ 的不动点, 其中 $h(X) = X - \mu g(X)$ .
 
-		\paragraph{}
-			\quad 我们有如下的结论
-				\begin{equation}
-					\Vert{S_\nu(Y_1) - S_\nu(Y_2)}\Vert_F \le \Vert{Y_1 - Y_2}\Vert_F
-				\end{equation}
-			以及, 当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$ , 其中 $A$ 满足 $\mathcal{A}(X) = A \text{vec}(X)$
-				\begin{equation}
-					\Vert{h(X_1) - h(X_2)}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
-				\end{equation}
-		
-		\paragraph{}
-			\quad 那么当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$
-				\begin{equation}
-					\Vert{S_{\psi \mu}(h(X_1)) - S_{\psi \mu}(h(X_2))}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
-				\end{equation}
-			即 $S_{\psi \mu} \circ h$ 是一个非扩张的映射, 由Brouwer不动点定理可知, 对任意 $X$ 进行迭代, 都能收敛到某个不动点.
+			\paragraph{}
+				\quad 我们有如下的结论
+				\begin{theo}
+					Shinkage算子 $S_\nu(\cdot)$ 是非扩张的, 即
+					\begin{equation}
+						\Vert{S_\nu(Y_1) - S_\nu(Y_2)}\Vert_F \le \Vert{Y_1 - Y_2}\Vert_F
+					\end{equation}
+				\end{theo}
 
-		\paragraph{}
-			\quad 实际计算中, 上述迭代过程中, 每步都要求做奇异值分解, 这并不是一件容易的事. 我们认为问题(1.5)中的原矩阵 $X$ 是一个低秩矩阵, 那么其奇异值大多都是 $0$ , 故可以考虑只求很少的几个奇异值.
+				\begin{theo}
+					当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$ , 其中 $A$ 满足 $\mathcal{A}(X) = A \text{vec}(X)$ , $h$ 是非扩张的, 即
+					\begin{equation}
+						\Vert{h(X_1) - h(X_2)}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
+					\end{equation}
+				\end{theo}
+				
+			
+			\paragraph{}
+				\quad 那么很自然的推论是, 当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$
+					\begin{equation}
+						\Vert{S_{\psi \mu}(h(X_1)) - S_{\psi \mu}(h(X_2))}\Vert_F \le \Vert{h(X_1) - h(X_2)}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
+					\end{equation}
+				即 $S_{\psi \mu} \circ h$ 是一个非扩张的映射, 由Brouwer不动点定理可知, 由任意 $X$ 开始进行迭代, 都能收敛到某个不动点.
 
-		\paragraph{}
-			\quad $A \in \Real{p \times q}$ , 取整数 $c$ , $d$ , $1 \le d \le c \le q$ , $(P_1, \cdots, P_q)$ , $P_i \ge 0$ , $\sum^{q}_{i = 1}P_i = 1$ . 构造随机向量 $(i_1, \cdots, i_c)$ , $P(i_t = j) = P_j$ , $t \in \{1, \cdots, c\}$ , $j \in \{1, \cdots, q\}$ . 再令随机矩阵
-				\begin{equation}
-					C = 
-					\begin{pmatrix}
-						C^{(1)} \\ \cdots \\ C^{(c)}
-					\end{pmatrix}
-					=
-					\begin{pmatrix}
-						A^{(i_i)}/\sqrt{c P_{i_1}} \\ \cdots \\ A^{(i_c)}/\sqrt{c P_{i_c}}
-					\end{pmatrix}
-					\in \Real{p \times c}
+		\subsection{奇异值计算的近似算法FPCA}
+			\paragraph{}
+				\quad 实际计算中, 上述迭代过程中, 每步都要求做奇异值分解, 这并不是一件容易的事. 我们认为问题(\ref{q5})中的原矩阵 $X$ 是一个低秩矩阵, 那么其奇异值大多都是 $0$ , 故可以考虑只求很少的几个奇异值.
+
+			\paragraph{}
+				\quad $A \in \Real{p \times q}$ , 取整数 $c$ , $d$ , $1 \le d \le c \le q$ , $(P_1, \cdots, P_q)$ , $P_i \ge 0$ , $\sum^{q}_{i = 1}P_i = 1$ . 构造随机向量 $(i_1, \cdots, i_c)$ , $P(i_t = j) = P_j$ , $t \in \{1, \cdots, c\}$ , $j \in \{1, \cdots, q\}$ . 再令随机矩阵
+				\begin{equation}\label{FPCAC}
+						C
+					=	\begin{pmatrix}
+							C^{(1)} \\ \cdots \\ C^{(c)}
+						\end{pmatrix}
+					=	\begin{pmatrix}
+							A^{(i_i)}/\sqrt{c P_{i_1}} \\ \cdots \\ A^{(i_c)}/\sqrt{c P_{i_c}}
+						\end{pmatrix}
+					\in	\Real{p \times c}
 				\end{equation}
-			求 $C ^\top C$ 的特征值分解
-				\begin{equation}
-					C ^\top C = \sum^{c}_{i = 1}\sigma_i^2(C) y_i y_i^\top
+				求 $C ^\top C$ 的特征值分解
+				\begin{equation}\label{FPCASgm}
+						C ^\top C 
+					=	\sum^{c}_{i = 1}\sigma_i^2(C) y_i y_i^\top
 				\end{equation}
-			其中 $\sigma_i(C) \ge 0$ , 为 $C$ 的奇异值 , 再构造矩阵
-				\begin{equation}
-					H = 
-					\begin{pmatrix}
-						H^{(1)} \\ \cdots \\ H^{(d)}
-					\end{pmatrix}
-					=
-					\begin{pmatrix}
-						Cy_1/\sigma_1(C) \\ \cdots \\ Cy_d/\sigma_d(C)
-					\end{pmatrix}
-					\in \Real{p \times d}
+				其中 $\sigma_i(C) \ge 0$ , 为 $C$ 的奇异值 , 再构造矩阵
+				\begin{equation}\label{FPCAH}
+						H 
+					=	\begin{pmatrix}
+							H^{(1)} \\ \cdots \\ H^{(d)}
+						\end{pmatrix}
+					=	\begin{pmatrix}
+							Cy_1/\sigma_1(C) \\ \cdots \\ Cy_d/\sigma_d(C)
+						\end{pmatrix}
+					\in	\Real{p \times d}
 				\end{equation}
-			令
-				\begin{equation}
-					A_d = H \text{Diag}(\sigma(C)) \big(A ^\top H \text{Diag}(1/\sigma(C))\big)^\top
+				令
+				\begin{equation}\label{FPCAAk}
+						A_d
+					=	H \text{Diag}(\sigma(C)) \big(A ^\top H \text{Diag}(1/\sigma(C))\big)^\top
 				\end{equation}
-			可以证明 $A_d$ 是 $A$ 的一个比较好的近似
+				可以证明 $A_d$ 是 $A$ 的一个比较好的近似
 				\begin{equation}
-					\Vert{A - A_d}\Vert^2_\xi \le \min_{\text{rank}(D) \le d} \Vert{A - D}\Vert^2_\xi + ploylog(d, 1/c) \Vert{A}\Vert^2_\xi
+						\Vert{A - A_d}\Vert^2_\xi 
+					\le	\min_{\text{rank}(D) \le d} \Vert{A - D}\Vert^2_\xi + ploylog(d, 1/c) \Vert{A}\Vert^2_\xi
 				\end{equation}
-			其中 $\xi = 2 \text{ 或 } F$ , $polylog$ 是多重对数函数. 用这种近似的方法改进的FPC算法就是FPCA法, 给出算法
+				其中 $\xi = 2 \text{ 或 } F$ , $polylog$ 是多重对数函数. 
+				
+			\paragraph{}
+				\quad 用这种近似的方法改进的FPC算法就是FPCA法, 给出算法
 				\begin{algo}
-					\s\\
-					步1\s给出 $X^1$ , $\mu^0 > 0$ , $1 > \theta > 0$ , $\epsilon > 0$ , 设置计数器 $k = 1$;\\
-					步2\s若 $\mu^k = \mu^{k -1} \theta \le \epsilon$ , 则停止;\\
-					步3\s选取合适的 $\psi > 0$ ;\\
-					步4\s计算 $Y^k = X^k - \psi \mathcal{A}^*(\mathcal{A}(X^k) - b))$;\\
-					步5\s选取合适的 $d$ , $\{P_i\}$ , 按(4.9)至(4.12), 计算近似的奇异值分解 $Y_d = H \text{Diag}(\sigma(C)) \big(Y ^\top H \text{Diag}(1/\sigma(C))\big)^\top$\\
-					步6\s计算 $X^{k+1} = S_{\psi \mu^k}(Y_d)$;\\
-					步7\s$k = k + 1$, 转步2;
+					\quad\\
+					步1 \quad 给出 $X^1$ , $\mu^0 > 0$ , $1 > \theta > 0$ , $\epsilon > 0$ , 设置计数器 $k = 1$;\\
+					步2 \quad 若 $\mu^k = \mu^{k -1} \theta \le \epsilon$ , 则停止;\\
+					步3 \quad 选取合适的 $\psi > 0$ ;\\
+					步4 \quad 计算 $Y^k = X^k - \psi \mathcal{A}^*(\mathcal{A}(X^k) - b))$;\\
+					步5 \quad 选取合适的 $d$ , $\{P_i\}$ , 按(\ref{FPCAC})至(\ref{FPCAAk}), 计算近似的奇异值分解 $Y_d = H \text{Diag}(\sigma(C)) \big(Y ^\top H \text{Diag}(1/\sigma(C))\big)^\top$\\
+					步6 \quad 计算 $X^{k + 1} = S_{\psi \mu^k}(Y_d)$;\\
+					步7 \quad $k = k + 1$, 转步2;
 				\end{algo}
 		
 
 
 		
-	\sect{补充知识}
+	\section{补充知识}
 		此部分会给出一些阅读本文必备的结论,许多结论将略过证明.
-		\ssect{奇异值分解}
-		$\forall X\in\Real{p\times q},X=UDV^\top$,
-		其中$U\in\Real{p\times p},V\in\Real{q\times q}$
-		是正交矩阵,
-		$D=Diag(\sigma)\in\Real{p\times q}$
-		对角线上为非负实数,其他位置为0的矩阵.
+		\subsection{奇异值分解}
+			\paragraph{}
+				\quad $\forall X \in \Real{p \times q}$ , $X = U D V^\top$ , 其中 $U \in \Real{p \times p}$ , $V \in \Real{q \times q}$ 是正交矩阵, $ D = \text{Diag}(\sigma) \in \Real{p \times q}$ 对角线上为非负实数,其他位置为0的矩阵.
 
-		\p这个分解称为\b{奇异值分解(SVD)},
-		对角矩阵Diag($\sigma$)的每个对角元素$\sigma_i$都是非负的,
-		称为矩阵的\b{奇异值},
-		正交矩阵$U$的列向量称为矩阵的\b{左奇异向量},
-		正交矩阵$V$的列向量称为矩阵的\b{右奇异向量}.
+			\paragraph{}
+				\quad 这个分解称为\b{奇异值分解(SVD)}, 对角矩阵Diag($\sigma$)的每个对角元素 $\sigma_i$ 都是非负的, 称为矩阵的\b{奇异值}, 正交矩阵 $U$ 的列向量称为矩阵的\b{左奇异向量}, 正交矩阵 $V$ 的列向量称为矩阵的\b{右奇异向量}.
 
-		\p有时也认为$X=UDV^\top$,
-		其中$U\in\Real{p\times r},V\in\Real{q\times r}$
-		是列正交矩阵,
-		$D\in\Real{r\times r}$
-		是非负实对角矩阵,
-		$r=rank(X)$.
-		%\[XX^\top=UDV^\top VD^\top U^\top=UDD^\top U^\top\]
-		%\[X^\top X=VD^\top U^\top UDV^\top=VD^\top DV^\top\]
-		%\p从上面的式子可以看出,奇异值和特征值还有着密切的联系:\b{(1)}.$U$的列向量（左奇异向量）是 $XX^{\top}$的特征向量;\b{(2)}.$V$的列向量（右奇异向量）是 $X^{\top}X$的特征向量;\b{(3)}.$D$的非零对角元（非零奇异值）是$XX^{\top}$或者$X^{\top}X$的非零特征值的平方根。
+			\paragraph{}
+				\quad 有时也认为 $X = U D V^\top$ , 其中 $U \in \Real{p \times r}$ , $V \in \Real{q \times r}$ 是列正交矩阵, $D \in \Real{r \times r}$ 是非负实对角矩阵,$r = rank(X)$.
 
-		\ssect{罚函数}
-		\p对于约束优化问题:
-		\equSplit{
-			\min_x\s&f(x),\\
-			\Tst&c_i(x)=0,\s i=1,\cdots,m_e;\\
-			&c_i(x)\geq 0,\s i=m_e+1,\cdots,m
-		}
-		\p我们可以通过把约束条件平方后,
-		乘上一个很大的常数$\mu$,
-		再加到目标函数上,转化为\b{罚函数}:
 
-		\equ{P(x,\mu)=f(x)+\mu \norm{\bar{c}(x)}^2_2}
-		其中$\bar{c}(x)=(\bar{c}_1(x),\cdots,\bar{c}_m(x))\in\Real{m}$,$\,\bar{c}_i(x)$如下定义:
-		$\bar{c}_i(x)=
-		\begin{cases}
-			c_i(x),\s i\leq m_e       \\
-			\max\{0,c_i(x)\},\s i>m_e \\
-		\end{cases}
-		$.
-		\p当$\mu\rightarrow\infty$,(5.3)和原问题(5.1)等价.
-		\equ{\min_x\s P(x,\mu)}
+		\subsection{罚函数}
+			\paragraph{}
+				\quad 对于约束优化问题:
+				\equSplit{\label{Q}
+					\min_x \quad
+						& f(x)\\
+					\Tst
+						& c_i(x) = 0, \quad i = 1, \cdots, m_e;\\
+						& c_i(x) \ge 0, \quad i = m_e + 1, \cdots, m
+				}
+			\paragraph{}
+				\quad 我们可以通过把约束条件平方后, 乘上一个很大的常数 $\mu$ , 再加到目标函数上, 转化为\b{罚函数}:
+				\equ{
+					P(x, \mu) = f(x) + \mu \norm{\bar{c}(x)}^2_2
+				}
+				其中
+				$
+						\bar{c}(x)
+					=	(\bar{c}_1(x), \cdots, \bar{c}_m(x))
+					\in	\Real{m}
+				$ , \quad
+				$\bar{c}_i(x)$如下定义:
+				$
+						\bar{c}_i(x)
+					=	\begin{cases}
+							c_i(x), \quad i \leq m_e\\
+							\max \{0, c_i(x)\}, \quad i > m_e \\
+						\end{cases}
+				$ .
+			\paragraph{}
+				\quad 当 $\mu \rightarrow \infty$ , (\ref{Punish})和原问题(\ref{Q})等价.
+				\equ{\label{Punish}
+					\min_x \quad P(x,\mu)
+				}
 
-		\p但在实际中,$\mu$无法取到无穷大,为了克服这一缺点,可以定义\b{增广Lagrange函数}(以下叙述仅考虑等值约束的情况,即$m_e=m$):
-		\equ{P(x,\lambda,\mu)=f(x)-\lambda^\top c(x)+\frac{1}{2}\mu\norm{c(x)}^2_2}
-		其中$\lambda,c(x)\in\Real{m},\lambda,\mu$给定.
+			\paragraph{}
+				\quad 但在实际中, $\mu$ 无法取到无穷大, 为了克服这一缺点, 可以定义\b{增广Lagrange函数}(以下叙述仅考虑等值约束的情况, 即 $m_e = m$ ):
+				\equ{\label{ALag}
+						P(x, \lambda, \mu)
+					=	f(x) - \lambda^\top c(x) + \frac{1}{2} \mu \norm{c(x)}^2_2
+				}
+				其中 $\lambda$ , $\lambda$ , $\mu$, $c(x) \in \Real{m}$ 给定.
 
-		\p(5.4)等价于以下的\b{Powell罚函数}:
-		\equ{P(x,\theta,\mu)=f(x)+\frac{1}{2}\mu\norm{c(x)-\theta}^2_2}
-		其中$c(x),\theta\in\Real{m}$,\,(5.4)与(5.5)只相差一个与$x$无关的常数$\frac{1}{2}\sigma\norm{\theta}^2_2$
+			\paragraph{}
+				\quad (\ref{ALag})等价于以下的\b{Powell罚函数}:
+				\equ{\label{Pow}
+						P(x, \theta, \mu)
+					=	f(x) + \frac{1}{2} \mu \norm{c(x) - \theta}^2_2
+				}
+				其中 $c(x) , \theta \in \Real{m}$ .
 
-		\ssect{对偶问题}
+			\paragraph{}
+				\quad (\ref{Punish})与(\ref{Pow})只相差一个与 $x$ 无关的常数 $\frac{1}{2} \sigma \norm{\theta}^2_2$ .
 
-		\p对于约束优化问题(5.1),它的\b{Langrange函数}为:
-		\equ{L(x,\mu,\lambda)=f(x)+\sum^{m_e}_{i=1}\mu_ic_i(x)+\sum^{m}_{i=m_e+1}\lambda_ic_i(x)}
+		\subsection{对偶问题}
+			\paragraph{}
+				\quad 对于约束优化问题(\ref{Q}),它的\b{Langrange函数}为:
+				\equ{
+						L(x, \mu, \lambda)
+					=	f(x) + \sum^{m_e}_{i = 1} \mu_i c_i(x) + \sum^{m}_{i = m_e + 1} \lambda_i c_i(x)
+				}
 
-		\p定义$g(\mu,\lambda)=\inf_xL(x,\mu,\lambda)$,\s通过这个函数我们可以把(5.1)转化为它的对偶问题:
-		\equSplit{
-			\max_{\mu,\lambda}\s g(\mu,\lambda)\\
-			\Tst\mu\succeq0\\
-		}
-		当满足一定条件(KKT条件)时,(5.7)和(5.1)是等价的.
+			\paragraph{}
+				\quad 定义 $g(\mu, \lambda) = \inf_x L(x, \mu, \lambda)$, 通过这个函数我们可以把(\ref{Q})转化为它的对偶问题:
+				\equSplit{\label{Dual}
+					\max_{\mu, \lambda} \quad
+						& g(\mu,\lambda)\\
+					\Tst
+						& \mu \succeq 0
+				}
+				当满足一定条件(KKT条件)时, (\ref{Dual})和(\ref{Q})是等价的.
 
-		\ssect{次梯度}
+		\subsection{次梯度}
+			\paragraph{}
+				\quad $f: E \rightarrow \Real{}$ 是一个定义在 $\Real{n}$ 的凸子集 $E$ 上的实值函数,则所有满足
+				\equ{
+					f(y) - f(x) \geq u(y-x), \quad \forall y \in E
+				qu}
+				的向量 $u$ 称为 $f$ 在 $x$ 点的\b{次梯度}, 所有这样的 $u$ 构成的集合称为 $f$ 在 $x$ 点的\b{次梯度集}.
 
-		\p$f:E\rightarrow\Real{}$
-		是一个定义在$\Real{n}$的凸子集$E$上的实值函数,则所有满足
-		\equ{f(y)-f(x)\geq u(y-x),\forall y\in E}
-		的向量$u$称为$f$在$x$点的\b{次梯度},
-		所有这样的$u$构成的集合称为$f$在$x$点的\b{次梯度集}.
-		\p次梯度集通常用$\partial f(x)$表示
-		\equ{\partial f(x)=\{u\in\Real{m}\vert f(y)-f(x)\geq u(y-x),\forall y\in E\}}
-		当函数在$x$点可微,$\partial f(x)=\{f^\prime(x)\}$;当函数在$x$点不可微,$\partial f(x)$是一个非空的紧凸集.
+			\paragraph{}
+				\quad 次梯度集通常用 $\partial f(x)$ 表示
+				\equ{
+						\partial f(x)
+					=	\{u \in \Real{m} \vert f(y) - f(x) \geq u(y - x), \quad \forall y \in E\}
+				}
+				当函数在 $x$ 点可微, $\partial f(x) = \{f^\prime(x)\}$ ; 当函数在 $x$ 点不可微, $\partial f(x)$ 是一个非空的紧凸集.
 
-		\p对于不可微函数或者不可微点,我们可以采用次梯度替代梯度进行分析.众所周知,一个点是最优解的必要条件是该点梯度为0.相应的,有如下结论:
-		\begin{theo}
-			$x^*$是(5.1)问题的最优解的一个必要条件是:$0\in\partial f(x^*)$.特别的,若$f$是凸函数,则是充要条件.
-		\end{theo}
+			\paragraph{}
+				\quad 对于不可微函数或者不可微点, 我们可以采用次梯度替代梯度进行分析. 众所周知, 一个点是最优解的必要条件是该点梯度为0. 相应的,有如下结论:
+			\begin{theo}
+				$x^*$ 是(\ref{Q})问题的最优解的一个必要条件是: $0 \in \partial f(x^*)$ . 特别的, 若 $f$ 是凸函数, 则是充要条件.
+			\end{theo}
 
-		\ssect{矩阵范数}
-		\p以下默认$A\in\Real{m\times n},x\in\Real{n}$,$k=\max\{m,n\},\lambda(A)=(\lambda_1(A),\cdots,\lambda_k(A))\in\Real{k}$是矩阵$A$的奇异值向量,$\lambda_i(A)$是矩阵$A$的第i个奇异值.
-		\sssect{诱导-p范数}
-		\p矩阵的\b{诱导-p范数}是将矩阵看作线性算子,由向量的p-范数诱导而来.
-		\[\norm{A}_p=\sup_{\norm{x}_p\leq1}\norm{Ax}_p\]
-		\p常见的有\b{2-范数}:
-		\[\norm{A}_2=\max_i\lambda_i(A)\]
+		\subsection{矩阵范数}
+			\paragraph{}
+				\quad 以下默认 $A \in \Real{m \times n}$ , $x \in \Real{n}$ , $k = \max \{m, n\}$ , $\lambda(A) = (\lambda_1(A), \cdots, \lambda_k(A)) \in \Real{k}$ 是矩阵 $A$ 的奇异值向量, $\lambda_i(A)$ 是矩阵 $A$ 的第i个奇异值.
+			\subsubsection{诱导-p范数}
+				\paragraph{}
+					\quad 矩阵的\b{诱导-p范数}是将矩阵看作线性算子, 由向量的p-范数诱导而来.
+					\[
+						\norm{A}_p = \sup_{\norm{x}_p \leq 1}\norm{Ax}_p
+					\]
 
-		\p\b{1-范数},又称\b{列范数}:
-		\[\norm{A}_1=\max_{1\leq j\leq n}\sum_{i=1}^m\abs{a_{ij}}\]
+				\paragraph{}
+					\quad 常见的有\b{2-范数}:
+					\[
+						\norm{A}_2 = \max_i \lambda_i(A)
+					\]
 
-		\p\b{$\infty$-范数},又称\b{行范数}:
-		\[\norm{A}_\infty=\max_{1\leq i\leq m}\sum_{j=1}^n\abs{a_{ij}}\]
+				\paragraph{}
+					\quad \b{1-范数}, 又称\b{列范数}:
+					\[
+						\norm{A}_1 = \max_{1 \leq j \leq n}\sum_{i = 1}^m \abs{a_{ij}}
+					\]
 
-		\sssect{F-范数}
-		\p矩阵的\b{F-范数}定义类似于向量的2-范数:
-		\[\norm{A}_F=(\sum_{i,j}a_{ij}^2)^{\frac{1}{2}}\]
-		\p定义矩阵内积$\inprod{A,X}=tr(A^\top X)$,F-范数与矩阵内积是相容的,可以看作内积诱导的范数,即$\norm{A}_F=\inprod{A,A}^{\frac{1}{2}}$.
+				\paragraph{}
+					\quad \b{$\infty$-范数}, 又称\b{行范数}:
+					\[
+						\norm{A}_\infty = \max_{1 \leq i \leq m}\sum_{j = 1}^n \abs{a_{ij}}
+					\]
 
-		\sssect{Schaten-p范数}
-		\p矩阵的\b{Schaten-p范数}是p-范数应用与矩阵奇异值向量所得的:
-		\[\norm{A}_p=(\sum_i^k\lambda_i(A)^p)^{\frac{1}{p}}=\norm{\lambda(A)}_p\]
+			\subsubsection{F-范数}
+				\paragraph{}
+					\quad 矩阵的\b{F-范数}定义类似于向量的2-范数:
+					\[
+						\norm{A}_F = (\sum_{i, j} a_{ij}^2)^{\frac{1}{2}}
+					\]
+				\paragraph{}
+					\quad 定义矩阵内积 $\inprod{A, X} = tr(A^\top X)$, F-范数与矩阵内积是相容的, 可以看作内积诱导的范数, 即 $\norm{A}_F = \inprod{A, A}^{\frac{1}{2}}$ .
 
-		\p矩阵的\b{核范数},又称\b{迹范数},是在$p=1$时Schaten-p范数:
-		\[\norm{A}_*=\sum_i^k\lambda_i(X)=tr(\sqrt{AA^\top})=\norm{A}_{tr}\]
+			\subsubsection{Schaten-p范数}
+				\paragraph{}
+					\quad 矩阵的\b{Schaten-p范数}是p-范数应用与矩阵奇异值向量所得的:
+					\[
+							\norm{A}_p
+						=	(\sum_i^k \lambda_i(A)^p)^{\frac{1}{p}}
+						=	\norm{\lambda(A)}_p
+					\]
+			
+			\subsubsection{核范数}
+				\paragraph{}
+					\quad 矩阵的\b{核范数}, 又称\b{迹范数}, 是在 $p = 1$ 时的Schaten-p范数:
+					\[
+							\norm{A}_*
+						=	\sum_i^k \lambda_i(X)
+						=	tr(\sqrt{A A^\top})
+						=	\norm{A}_{tr}
+					\]
 
-		%\p我们来说明这一点.对$A$做奇异值分解$A=UDV^\top,D=Diag(\sigma)$,设$B=UDU^{-1}$,则$B\in\Real{m\times m}$,相似于一个非负的实对角矩阵,因而是对称正定的.
-		%\[AA^\top=UDV^\top VD^\top U^\top=UDD^\top U^\top=UDU^{-1}UD^\top U^{-1}=BB^\top=B^2\]
-		%因此$B=\sqrt{AA^\top}$是well-defined,即有
-		%\equ{\norm{A}_*=\sum_{i=1}^r\sigma_i=tr(D)=tr(B)=tr(\sqrt{AA^\top})=\norm{A}_{tr}}
+				\paragraph{}
+					\quad 特别的, 当 $A$ 是对称正定的方阵, 则有 $ A = \sqrt{A A^\top}$ , 即
+					\[
+						\norm{A}_* = tr(A)
+					\]
 
-		\p特别的,当$A$是对称正定的方阵,则有$A=\sqrt{AA^\top}$,即
-		\[\norm{A}_*=tr(A)\]
+				\paragraph{}
+					\quad 核范数 $\norm{A}_* = \norm{\lambda(A)}_1$ , 而矩阵的秩 $rank(A) = \norm{\lambda(A)}_0$ , 由此可以看出, 核范数与秩的关系就是1-范数与0-范数的关系, 故采用核范数来近似秩.
 
-		\p核范数$\norm{A}_*=\norm{\lambda(A)}_1$,而矩阵的秩$rank(A)=\norm{\lambda(A)}_0$,由此可以看出,核范数与秩的关系就是1-范数与0-范数的关系,故采用核范数来近似秩.
-
-		\p核范数是非光滑函数的,次梯度集如下
-		\equ{\partial\nunorm=\{UV^\top+W\vert U^\top W=0,WV=0,\norm{W}_2\leq1\}}
-		其中$X=UDV^\top$
-
+				\paragraph{}
+					\quad 核范数是非光滑函数的, 次梯度集如下
+					\equ{\label{NuNormSubGrad}
+							\partial \nunorm
+						=	\{U V^\top + W \vert U^\top W = 0,WV = 0, \norm{W}_2 \leq 1\}
+					}
+					其中 $X = U D V^\top$
 \end{document}
