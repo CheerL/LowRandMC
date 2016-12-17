@@ -89,7 +89,7 @@
 		}
 
 		\p很自然的,一个重要的问题是:(1.1)与(1.3),或者(1.2)与(1.4)什么时候等价?略过证明,直接描述以下重要的结论:
-		\p对于(1.3),Candes和陶哲轩等给出了一个证明.当在某些条件下,若已知元素个数$\abs{\Omega}=m=O(nr\cdot\text{polylog}(n))$,其中$n=max(p,q)$,polylog是多重对数函数,则矩阵有很高概率可以通过(1.3)恢复.
+		\p对于(1.3),Candes和陶哲轩等给出了一个证明.当在某些条件下,若已知元素个数$\abs{\Omega}=m=O(nr\cdot polylog(n))$,其中$n=max(p,q)$, $polylog$是多重对数函数,则矩阵有很高概率可以通过(1.3)恢复.
 		\p对于(1.4),Recht等给出了一个证明.将线性映射$\mathcal{A}$的矩阵形式记作$A$,即$\mathcal{A}(X)=A\text{vec}(X)$,其中$\text{vec}(X)\in\Real{pq}$为矩阵$X$的向量化.当$A$是一个随机高斯矩阵,若向量$b$的维数$m\geq C(r(p+q)log(pq)$,其中$C$是一个正的常数,则矩阵有很高概率可以通过(1.4)恢复.
 		\p实际上,由线性代数知识容易知道,(1.4)要求的线性约束条件并不总能成立,因此有时需要适当松弛.考虑(1.4)的罚函数:
 		\equ{\min\s\nunorm+\frac{1}{2\mu}\norm{\mathcal{A}(X)-b}_2^2}
@@ -494,8 +494,54 @@
 
 		\paragraph{}\quad 实际计算中, 上述迭代过程中, 每步都要求做奇异值分解, 这并不是一件容易的事. 我们认为问题(1.5)中的原矩阵 $X$ 是一个低秩矩阵, 那么其奇异值大多都是 $0$ , 故可以考虑只求很少的几个奇异值.
 
-		\paragraph{}\quad $X \in \Real{p \times q}$ , 取 $c$ , $k$ 
-
+		\paragraph{}\quad $A \in \Real{p \times q}$ , 取整数 $c$ , $d$ , $1 \le d \le c \le q$ , $(P_1, \cdots, P_q)$ , $P_i \ge 0$ , $\sum^{q}_{i = 1}P_i = 1$ . 构造随机向量 $(i_1, \cdots, i_c)$ , $P(i_t = j) = P_j$ , $t \in \{1, \cdots, c\}$ , $j \in \{1, \cdots, q\}$ . 再令随机矩阵
+		\begin{equation}
+			C = 
+			\begin{pmatrix}
+				C^{(1)} \\ \cdots \\ C^{(c)}
+			\end{pmatrix}
+			=
+			\begin{pmatrix}
+				A^{(i_i)}/\sqrt{c P_{i_1}} \\ \cdots \\ A^{(i_c)}/\sqrt{c P_{i_c}}
+			\end{pmatrix}
+			\in \Real{p \times c}
+		\end{equation}
+		求 $C ^\top C$ 的特征值分解
+		\begin{equation}
+			C ^\top C = \sum^{c}_{i = 1}\sigma_i^2(C) y_i y_i^\top
+		\end{equation}
+		其中 $\sigma_i(C) \ge 0$ , 为 $C$ 的奇异值 , 再构造矩阵
+		\begin{equation}
+			H = 
+			\begin{pmatrix}
+				H^{(1)} \\ \cdots \\ H^{(d)}
+			\end{pmatrix}
+			=
+			\begin{pmatrix}
+				Cy_1/\sigma_1(C) \\ \cdots \\ Cy_d/\sigma_d(C)
+			\end{pmatrix}
+			\in \Real{p \times d}
+		\end{equation}
+		令
+			\begin{equation}
+				A_d = H \text{Diag}(\sigma(C)) \big(A ^\top H \text{Diag}(1/\sigma(C))\big)^\top
+			\end{equation}
+		可以证明 $A_d$ 是 $A$ 的一个比较好的近似
+			\begin{equation}
+				\Vert{A - A_d}\Vert^2_\xi \le \min_{\text{rank}(D) \le d} \Vert{A - D}\Vert^2_\xi + ploylog(d, 1/c) \Vert{A}\Vert^2_\xi
+			\end{equation}
+		其中 $\xi = 2 \text{ 或 } F$ , $polylog$ 是多重对数函数. 用这种近似的方法改进的FPC算法就是FPCA法, 给出算法
+			\begin{algo}
+				\s\\
+				步1\s给出 $X^1$ , $\mu^0 > 0$ , $1 > \theta > 0$ , $\epsilon > 0$ , 设置计数器 $k = 1$;\\
+				步2\s若 $\mu^k = \mu^{k -1} \theta \le \epsilon$ , 则停止;\\
+				步3\s选取合适的 $\psi > 0$ ;\\
+				步4\s计算 $Y^k = X^k - \psi \mathcal{A}^*(\mathcal{A}(X^k) - b))$;\\
+				步5\s选取合适的 $d$ , $\{P_i\}$ , 按(4.9)至(4.12), 计算近似的奇异值分解 $Y_d = H \text{Diag}(\sigma(C)) \big(Y ^\top H \text{Diag}(1/\sigma(C))\big)^\top$\\
+				步6\s计算 $X^{k+1} = S_{\psi \mu^k}(Y_d)$;\\
+				步7\s$k = k + 1$, 转步2;
+			\end{algo}
+		
 
 
 		
