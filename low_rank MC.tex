@@ -378,169 +378,181 @@
 
 
 	\sect{FPCA法}
-		\paragraph{}\quad FPCA法是一种基于不动点定理的算法, 可以解决问题(1.5). 
+		\paragraph{}
+			\quad FPCA法是一种基于不动点定理的算法, 可以解决问题(1.5). 
 
-		\paragraph{}\quad $\nunorm+\frac{1}{2\mu}\norm{\mathcal{A}(X)-b}_2^2$ 是一个凸函数, 那么只要求梯度为0的点. 但 $\nunorm$ 是不可微的, 故考虑次梯度, 即要求
-			\begin{equation}
-				0 \in \mu \partial \nunorm + g(X)
-			\end{equation}
+		\paragraph{}
+			\quad $\nunorm+\frac{1}{2\mu}\norm{\mathcal{A}(X)-b}_2^2$ 是一个凸函数, 那么只要求梯度为0的点. 但 $\nunorm$ 是不可微的, 故考虑次梯度, 即要求
+				\begin{equation}
+					0 \in \mu \partial \nunorm + g(X)
+				\end{equation}
 			其中 $g(X) = \mathcal{A}^*(\mathcal{A}(X) - b)$
 		
-		\paragraph{}\quad 设 $Y = X - \psi g(X)$ , $\psi > 0$ 是给定常数, 则(4.1)等价于
-			\begin{equation}
-				0 \in \psi \mu \partial \nunorm + X - (X - \psi g(X)) = \psi \mu \partial \nunorm + X -Y
-			\end{equation}
+		\paragraph{}
+			\quad 设 $Y = X - \psi g(X)$ , $\psi > 0$ 是给定常数, 则(4.1)等价于
+				\begin{equation}
+					0 \in \psi \mu \partial \nunorm + X - (X - \psi g(X)) = \psi \mu \partial \nunorm + X -Y
+				\end{equation}
 
-		\paragraph{}\quad (4.2)恰好是 $\nunorm + \frac{1}{2} \Vert{X - Y}\Vert^2_F$ 的次梯度, 即(1.4)等价于 
-			\begin{equation}
-				\min \psi \mu \nunorm + \frac{1}{2} \Vert{X - Y}\Vert^2_F
-			\end{equation}
-		\paragraph{}\quad 当认为 $Y$ 是给定的情况下, 该问题的解为 $S_{\psi \mu}(Y)$, 其中 $S_{\psi \mu}(Y)$ 是Shinkage算子, 定义如下
+		\paragraph{}
+			\quad (4.2)恰好是 $\nunorm + \frac{1}{2} \Vert{X - Y}\Vert^2_F$ 的次梯度, 即(1.4)等价于 
+				\begin{equation}
+					\min \psi \mu \nunorm + \frac{1}{2} \Vert{X - Y}\Vert^2_F
+				\end{equation}
+
+		\paragraph{}
+			\quad 当认为 $Y$ 是给定的情况下, 该问题的解为 $S_{\psi \mu}(Y)$, 其中 $S_{\psi \mu}(Y)$ 是Shinkage算子, 定义如下
 		
-		\paragraph{}\quad 对 $X \in \Real{m \times n}$ 做奇异值分解, $X = U \text{Diag}(\sigma) V ^\top$ , $r = \text{rank}(X)$ , $U \in \Real{m \times r}$ , $V \in \Real{n \times r}$ , 对 $\forall \nu > 0$ , 定义向量 $\bar{\sigma} = (\bar{\sigma_1}, \cdots, \bar{\sigma_r})$ , 其中$\bar{\sigma_i} = \max \{\sigma_i - \nu, 0\}$ , 那么Shinkage算子定义为 $S_\nu(X) = U \text{Diag}(\bar{\sigma}) V ^\top$
+		\paragraph{}
+			\quad 对 $X \in \Real{m \times n}$ 做奇异值分解, $X = U \text{Diag}(\sigma) V ^\top$ , $r = \text{rank}(X)$ , $U \in \Real{m \times r}$ , $V \in \Real{n \times r}$ , 对 $\forall \nu > 0$ , 定义向量 $\bar{\sigma} = (\bar{\sigma_1}, \cdots, \bar{\sigma_r})$ , 其中$\bar{\sigma_i} = \max \{\sigma_i - \nu, 0\}$ , 那么Shinkage算子定义为 $S_\nu(X) = U \text{Diag}(\bar{\sigma}) V ^\top$
 
-		\paragraph{}\quad 不失一般性, 设 $m \le n$ , 记 $\nu = \psi \mu$ , $X = U \text{Diag}(\sigma) V ^\top$ , $Y = U_Y \text{Diag}(\gamma) V_Y ^\top$ 是 $X$ , $Y$ 的SVD, $\text{rank} X = r$ , $\text{rank} Y = t$.
+		\paragraph{}
+			\quad 不失一般性, 设 $m \le n$ , 记 $\nu = \psi \mu$ , $X = U \text{Diag}(\sigma) V ^\top$ , $Y = U_Y \text{Diag}(\gamma) V_Y ^\top$ 是 $X$ , $Y$ 的SVD, $\text{rank} X = r$ , $\text{rank} Y = t$.
 		
-		因为 $\partial \Vert{X}\Vert_* = \{UV^\top+W\vert U^\top W=0,WV=0,\norm{W}_2\leq1\}$ , 找到矩阵 $\bar{U} \in \Real{m \times (m - r)}$ , $\bar{V} \in \Real{n \times (n - r)}$ , 使得 $\tilde{U} = [U, \bar{U}]$ , $\tilde{V} = [V, \bar{V}]$ 分别是 $m$ , $n$ 阶正交矩阵. 那么易验证, 当 $\bar{\sigma} \in \Real{m-r}_+$ , $\Vert{\sigma}\Vert_\infty \le 1$ , 形如 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ 的矩阵 $W \in \partial \Vert{X}\Vert_*$ .
+			因为 $\partial \Vert{X}\Vert_* = \{UV^\top+W\vert U^\top W=0,WV=0,\norm{W}_2\leq1\}$ , 找到矩阵 $\bar{U} \in \Real{m \times (m - r)}$ , $\bar{V} \in \Real{n \times (n - r)}$ , 使得 $\tilde{U} = [U, \bar{U}]$ , $\tilde{V} = [V, \bar{V}]$ 分别是 $m$ , $n$ 阶正交矩阵. 那么易验证, 当 $\bar{\sigma} \in \Real{m-r}_+$ , $\Vert{\sigma}\Vert_\infty \le 1$ , 形如 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ 的矩阵 $W \in \partial \Vert{X}\Vert_*$ .
 
-		若 $0 \in \nu \partial \nunorm + X -Y$ , 则说明 $\exists W \in \partial \nunorm$ 使 $\nu (UV ^\top + W) + X -Y = 0$ . 那么可以看到当 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ , 则要求
-		\begin{equation}
-			\begin{split}
-					&\nu (UV ^\top + W) + X -Y\\
-				=	&(\nu U I V ^\top + \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top + U \text{Diag}(\sigma) V ^\top) - Y\\
-				=	&\begin{pmatrix}
+			若 $0 \in \nu \partial \nunorm + X -Y$ , 则说明 $\exists W \in \partial \nunorm$ 使 $\nu (UV ^\top + W) + X -Y = 0$ . 那么可以看到当 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ , 则要求
+				\begin{equation}
+					\begin{split}
+							&\nu (UV ^\top + W) + X -Y\\
+						=	&(\nu U I V ^\top + \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top + U \text{Diag}(\sigma) V ^\top) - Y\\
+						=	&\begin{pmatrix}
+								U \\ \bar{U}
+							\end{pmatrix}
+							\Bigg [
+								\begin{pmatrix}
+									\nu I & 0 & 0\\
+									0 & 0 & 0
+								\end{pmatrix}
+								+
+								\begin{pmatrix}
+									0 & 0 & 0\\
+									0 & \nu \text{Diag}(\bar{\sigma}) & 0
+								\end{pmatrix}
+								+
+								\begin{pmatrix}
+									\text{Diag}(\sigma) & 0 & 0\\
+									0 & 0 & 0
+								\end{pmatrix}
+								\Bigg ]
+							\begin{pmatrix}
+								V \\ \bar{V}
+							\end{pmatrix} ^\top 
+							- U_Y \text{Diag}(\gamma) V_Y ^\top\\
+						=	&\begin{pmatrix}
+								U \\ \bar{U}
+							\end{pmatrix}
+							\begin{pmatrix}
+								\nu I + \text{Diag}(\sigma) & 0 & 0\\
+								0 & \nu \text{Diag}(\bar{\sigma}) & 0
+							\end{pmatrix}
+							\begin{pmatrix}
+								V \\ \bar{V}
+							\end{pmatrix} ^\top 
+							- U_Y \text{Diag}(\gamma) V_Y ^\top = 0
+					\end{split}
+				\end{equation}
+
+			当 $\gamma_1 \ge \cdots \ge \gamma_t \ge \nu$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = t$ , $U = U_Y$ , $V = V_Y$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_t - \nu)$ , 对于这样的 $X$ , 取 $\bar{\sigma} = 0$ 即 $W = 0$ , (4.4)成立.
+
+			当 $\gamma_1 \ge \cdots \ge \gamma_k \ge \nu \ge \gamma_{k+1} \ge \cdots \ge \gamma_t$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = k$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_k - \nu, 0, \cdots, 0)$ , 对这样的 $X$ , 取 $\bar{\sigma} = (\gamma_{k+1}/\nu, \cdots, \gamma_{t}/\nu, 0, \cdots, 0)$ , 同时令 $\bar{U}$ 的前 $t - k$ 行依次为 $U_Y$ 的 $k + 1$ 至 $t$ 行, $\bar{V}$ 的前 $t - k$ 行依次为 $V_Y$ 的 $k + 1$ 至 $t$ 行, 即 
+				$
+					\begin{pmatrix}
 						U \\ \bar{U}
+					\end{pmatrix} 
+					=
+					\begin{pmatrix}
+						U_Y \\ \bar{U}'
 					\end{pmatrix}
-					\Bigg [
-						\begin{pmatrix}
-							\nu I & 0 & 0\\
-							0 & 0 & 0
-						\end{pmatrix}
-						+
-						\begin{pmatrix}
-							0 & 0 & 0\\
-							0 & \nu \text{Diag}(\bar{\sigma}) & 0
-						\end{pmatrix}
-						+
-						\begin{pmatrix}
-							\text{Diag}(\sigma) & 0 & 0\\
-							0 & 0 & 0
-						\end{pmatrix}
-						\Bigg ]
+				$ ,
+				$
 					\begin{pmatrix}
 						V \\ \bar{V}
-					\end{pmatrix} ^\top 
-					- U_Y \text{Diag}(\gamma) V_Y ^\top\\
-				=	&\begin{pmatrix}
-						U \\ \bar{U}
-					\end{pmatrix}
+					\end{pmatrix} 
+					=
 					\begin{pmatrix}
-						\nu I + \text{Diag}(\sigma) & 0 & 0\\
-						0 & \nu \text{Diag}(\bar{\sigma}) & 0
+						V_Y \\ \bar{V}'
 					\end{pmatrix}
-					\begin{pmatrix}
-						V \\ \bar{V}
-					\end{pmatrix} ^\top 
-					- U_Y \text{Diag}(\gamma) V_Y ^\top = 0
-			\end{split}
-		\end{equation}
+				$ ,
+			其中 $\bar{U}'$ 是 $\bar{U}$ 的后 $m - t$ 行, $\bar{V}'$ 是 $\bar{V}$ 的后 $n - t$ 行, 此时(4.4)也成立.
 
-		当 $\gamma_1 \ge \cdots \ge \gamma_t \ge \nu$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = t$ , $U = U_Y$ , $V = V_Y$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_t - \nu)$ , 对于这样的 $X$ , 取 $\bar{\sigma} = 0$ 即 $W = 0$ , (4.4)成立.
-
-		当 $\gamma_1 \ge \cdots \ge \gamma_k \ge \nu \ge \gamma_{k+1} \ge \cdots \ge \gamma_t$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = k$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_k - \nu, 0, \cdots, 0)$ , 对这样的 $X$ , 取 $\bar{\sigma} = (\gamma_{k+1}/\nu, \cdots, \gamma_{t}/\nu, 0, \cdots, 0)$ , 同时令 $\bar{U}$ 的前 $t - k$ 行依次为 $U_Y$ 的 $k + 1$ 至 $t$ 行, $\bar{V}$ 的前 $t - k$ 行依次为 $V_Y$ 的 $k + 1$ 至 $t$ 行, 即 
-		$
-			\begin{pmatrix}
-				U \\ \bar{U}
-			\end{pmatrix} 
-			=
-			\begin{pmatrix}
-				U_Y \\ \bar{U}'
-			\end{pmatrix}
-		$
-		,
-		$
-			\begin{pmatrix}
-				V \\ \bar{V}
-			\end{pmatrix} 
-			=
-			\begin{pmatrix}
-				V_Y \\ \bar{V}'
-			\end{pmatrix}
-		$ ,
-		其中 $\bar{U}'$ 是 $\bar{U}$ 的后 $m - t$ 行, $\bar{V}'$ 是 $\bar{V}$ 的后 $n - t$ 行, 此时(4.4)也成立.
-
-		故 $S_{\psi \mu}(Y)$ 是(4.3)的解.
+			故 $S_{\psi \mu}(Y)$ 是(4.3)的解.
 		
-		\paragraph{}\quad 也就是说, 我们只需要求出合适的 $Y$ , $S_{\psi \mu}(Y)$ 就是(1.5)的解. 由 $X$ 与 $Y$ 的关系可以看出, 若 $X^*$ 是(1.5)的解, 则
-			\begin{equation}
-				X^* = S_{\psi \mu}(X^* - \mu g(X^*)) = S_{\psi \mu}(X^* - \mu \mathcal{A}^*(\mathcal{A}(X^*) - b))
-			\end{equation}
-		即 $X^*$ 是映射 $S_{\psi \mu} \circ h$ 的不动点, 其中 $h(X) = X - \mu g(X)$ .
+		\paragraph{}
+			\quad 也就是说, 我们只需要求出合适的 $Y$ , $S_{\psi \mu}(Y)$ 就是(1.5)的解. 由 $X$ 与 $Y$ 的关系可以看出, 若 $X^*$ 是(1.5)的解, 则
+				\begin{equation}
+					X^* = S_{\psi \mu}(X^* - \mu g(X^*)) = S_{\psi \mu}(X^* - \mu \mathcal{A}^*(\mathcal{A}(X^*) - b))
+				\end{equation}
+			即 $X^*$ 是映射 $S_{\psi \mu} \circ h$ 的不动点, 其中 $h(X) = X - \mu g(X)$ .
 
-		\paragraph{}\quad 我们有如下的结论
-			\begin{equation}
-				\Vert{S_\nu(Y_1) - S_\nu(Y_2)}\Vert_F \le \Vert{Y_1 - Y_2}\Vert_F
-			\end{equation}
+		\paragraph{}
+			\quad 我们有如下的结论
+				\begin{equation}
+					\Vert{S_\nu(Y_1) - S_\nu(Y_2)}\Vert_F \le \Vert{Y_1 - Y_2}\Vert_F
+				\end{equation}
 			以及, 当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$ , 其中 $A$ 满足 $\mathcal{A}(X) = A \text{vec}(X)$
-			\begin{equation}
-				\Vert{h(X_1) - h(X_2)}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
-			\end{equation}
+				\begin{equation}
+					\Vert{h(X_1) - h(X_2)}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
+				\end{equation}
 		
-		\paragraph{}\quad 那么当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$
-			\begin{equation}
-				\Vert{S_{\psi \mu}(h(X_1)) - S_{\psi \mu}(h(X_2))}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
-			\end{equation}
+		\paragraph{}
+			\quad 那么当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$
+				\begin{equation}
+					\Vert{S_{\psi \mu}(h(X_1)) - S_{\psi \mu}(h(X_2))}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
+				\end{equation}
 			即 $S_{\psi \mu} \circ h$ 是一个非扩张的映射, 由Brouwer不动点定理可知, 对任意 $X$ 进行迭代, 都能收敛到某个不动点.
 
-		\paragraph{}\quad 实际计算中, 上述迭代过程中, 每步都要求做奇异值分解, 这并不是一件容易的事. 我们认为问题(1.5)中的原矩阵 $X$ 是一个低秩矩阵, 那么其奇异值大多都是 $0$ , 故可以考虑只求很少的几个奇异值.
+		\paragraph{}
+			\quad 实际计算中, 上述迭代过程中, 每步都要求做奇异值分解, 这并不是一件容易的事. 我们认为问题(1.5)中的原矩阵 $X$ 是一个低秩矩阵, 那么其奇异值大多都是 $0$ , 故可以考虑只求很少的几个奇异值.
 
-		\paragraph{}\quad $A \in \Real{p \times q}$ , 取整数 $c$ , $d$ , $1 \le d \le c \le q$ , $(P_1, \cdots, P_q)$ , $P_i \ge 0$ , $\sum^{q}_{i = 1}P_i = 1$ . 构造随机向量 $(i_1, \cdots, i_c)$ , $P(i_t = j) = P_j$ , $t \in \{1, \cdots, c\}$ , $j \in \{1, \cdots, q\}$ . 再令随机矩阵
-		\begin{equation}
-			C = 
-			\begin{pmatrix}
-				C^{(1)} \\ \cdots \\ C^{(c)}
-			\end{pmatrix}
-			=
-			\begin{pmatrix}
-				A^{(i_i)}/\sqrt{c P_{i_1}} \\ \cdots \\ A^{(i_c)}/\sqrt{c P_{i_c}}
-			\end{pmatrix}
-			\in \Real{p \times c}
-		\end{equation}
-		求 $C ^\top C$ 的特征值分解
-		\begin{equation}
-			C ^\top C = \sum^{c}_{i = 1}\sigma_i^2(C) y_i y_i^\top
-		\end{equation}
-		其中 $\sigma_i(C) \ge 0$ , 为 $C$ 的奇异值 , 再构造矩阵
-		\begin{equation}
-			H = 
-			\begin{pmatrix}
-				H^{(1)} \\ \cdots \\ H^{(d)}
-			\end{pmatrix}
-			=
-			\begin{pmatrix}
-				Cy_1/\sigma_1(C) \\ \cdots \\ Cy_d/\sigma_d(C)
-			\end{pmatrix}
-			\in \Real{p \times d}
-		\end{equation}
-		令
-			\begin{equation}
-				A_d = H \text{Diag}(\sigma(C)) \big(A ^\top H \text{Diag}(1/\sigma(C))\big)^\top
-			\end{equation}
-		可以证明 $A_d$ 是 $A$ 的一个比较好的近似
-			\begin{equation}
-				\Vert{A - A_d}\Vert^2_\xi \le \min_{\text{rank}(D) \le d} \Vert{A - D}\Vert^2_\xi + ploylog(d, 1/c) \Vert{A}\Vert^2_\xi
-			\end{equation}
-		其中 $\xi = 2 \text{ 或 } F$ , $polylog$ 是多重对数函数. 用这种近似的方法改进的FPC算法就是FPCA法, 给出算法
-			\begin{algo}
-				\s\\
-				步1\s给出 $X^1$ , $\mu^0 > 0$ , $1 > \theta > 0$ , $\epsilon > 0$ , 设置计数器 $k = 1$;\\
-				步2\s若 $\mu^k = \mu^{k -1} \theta \le \epsilon$ , 则停止;\\
-				步3\s选取合适的 $\psi > 0$ ;\\
-				步4\s计算 $Y^k = X^k - \psi \mathcal{A}^*(\mathcal{A}(X^k) - b))$;\\
-				步5\s选取合适的 $d$ , $\{P_i\}$ , 按(4.9)至(4.12), 计算近似的奇异值分解 $Y_d = H \text{Diag}(\sigma(C)) \big(Y ^\top H \text{Diag}(1/\sigma(C))\big)^\top$\\
-				步6\s计算 $X^{k+1} = S_{\psi \mu^k}(Y_d)$;\\
-				步7\s$k = k + 1$, 转步2;
-			\end{algo}
+		\paragraph{}
+			\quad $A \in \Real{p \times q}$ , 取整数 $c$ , $d$ , $1 \le d \le c \le q$ , $(P_1, \cdots, P_q)$ , $P_i \ge 0$ , $\sum^{q}_{i = 1}P_i = 1$ . 构造随机向量 $(i_1, \cdots, i_c)$ , $P(i_t = j) = P_j$ , $t \in \{1, \cdots, c\}$ , $j \in \{1, \cdots, q\}$ . 再令随机矩阵
+				\begin{equation}
+					C = 
+					\begin{pmatrix}
+						C^{(1)} \\ \cdots \\ C^{(c)}
+					\end{pmatrix}
+					=
+					\begin{pmatrix}
+						A^{(i_i)}/\sqrt{c P_{i_1}} \\ \cdots \\ A^{(i_c)}/\sqrt{c P_{i_c}}
+					\end{pmatrix}
+					\in \Real{p \times c}
+				\end{equation}
+			求 $C ^\top C$ 的特征值分解
+				\begin{equation}
+					C ^\top C = \sum^{c}_{i = 1}\sigma_i^2(C) y_i y_i^\top
+				\end{equation}
+			其中 $\sigma_i(C) \ge 0$ , 为 $C$ 的奇异值 , 再构造矩阵
+				\begin{equation}
+					H = 
+					\begin{pmatrix}
+						H^{(1)} \\ \cdots \\ H^{(d)}
+					\end{pmatrix}
+					=
+					\begin{pmatrix}
+						Cy_1/\sigma_1(C) \\ \cdots \\ Cy_d/\sigma_d(C)
+					\end{pmatrix}
+					\in \Real{p \times d}
+				\end{equation}
+			令
+				\begin{equation}
+					A_d = H \text{Diag}(\sigma(C)) \big(A ^\top H \text{Diag}(1/\sigma(C))\big)^\top
+				\end{equation}
+			可以证明 $A_d$ 是 $A$ 的一个比较好的近似
+				\begin{equation}
+					\Vert{A - A_d}\Vert^2_\xi \le \min_{\text{rank}(D) \le d} \Vert{A - D}\Vert^2_\xi + ploylog(d, 1/c) \Vert{A}\Vert^2_\xi
+				\end{equation}
+			其中 $\xi = 2 \text{ 或 } F$ , $polylog$ 是多重对数函数. 用这种近似的方法改进的FPC算法就是FPCA法, 给出算法
+				\begin{algo}
+					\s\\
+					步1\s给出 $X^1$ , $\mu^0 > 0$ , $1 > \theta > 0$ , $\epsilon > 0$ , 设置计数器 $k = 1$;\\
+					步2\s若 $\mu^k = \mu^{k -1} \theta \le \epsilon$ , 则停止;\\
+					步3\s选取合适的 $\psi > 0$ ;\\
+					步4\s计算 $Y^k = X^k - \psi \mathcal{A}^*(\mathcal{A}(X^k) - b))$;\\
+					步5\s选取合适的 $d$ , $\{P_i\}$ , 按(4.9)至(4.12), 计算近似的奇异值分解 $Y_d = H \text{Diag}(\sigma(C)) \big(Y ^\top H \text{Diag}(1/\sigma(C))\big)^\top$\\
+					步6\s计算 $X^{k+1} = S_{\psi \mu^k}(Y_d)$;\\
+					步7\s$k = k + 1$, 转步2;
+				\end{algo}
 		
 
 
