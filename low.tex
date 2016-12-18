@@ -348,14 +348,14 @@
 					\end{split}
 				\end{equation}
 				通过选取最佳的 $\mu$ 和 $X$ 可以求出(\ref{dualQ})的最优解.
-		
-		
+
+
 			\paragraph{}
 				\quad 采用如下的迭代过程以求解问题(\ref{dualQ})
 				\begin{equation}
 					\begin{split}\label{dualA}
 							\mu^{k + 1}
-						\in	& [\alpha \mu^k, \mu^k], \quad \alpha \in (0,1)\\
+						=	& \alpha \mu^k, \quad \alpha \in (0,1)\\
 							X^{k + 1}
 						=	& X^k + \frac{\mathcal{A}^*(y^{k + 1}) - S^{k + 1}}{\mu^k}\\
 							(y^{k + 1}, S^{k + 1}) 
@@ -364,17 +364,28 @@
 				\end{equation}
 		\subsection{交替方向求解}
 			\paragraph{}
-				\quad 但实际上, (\ref{dualA})并不容易解, 因此我们考虑使用交替方向法来求解这个方程, 即
+				\quad 但实际上, (\ref{dualA})第3式并不容易解, 因此我们考虑使用交替方向法来求解这个方程, 即
 				\begin{align}
 						y^{k + 1}
 					=	& \arg \min_{y, S}L(y, S^k, X^k, \mu^k) \label{FixS}\\
 						S^{k + 1}
 					=	& \arg \min_{y, S}L(y^{k + 1}, S, X^k, \mu^k) \label{FixY}
 				\end{align}
-				$\mu^{k + 1}$ 和 $X^{k + 1}$ 的求法不变.
+			
+			\begin{theo}
+				当固定 $S^k$ , (\ref{FixS})的最优解为:
+					\begin{equation}\label{dualAY}
+						y^{k + 1} = \mu^k(b - \mathcal{A}(X^k)) + \mathcal{A}(S^k)
+					\end{equation}
+				当固定 $y^{k + 1}$ , (\ref{FixY})的最优解为:
+					\begin{equation}\label{dualAS}
+						S^{k + 1} = U \text{Diag}(\min \{\sigma, 1\}) V^\top
+					\end{equation}
+				其中 $U, V$ 来自 $Y = \mathcal{A}^*(y^{k + 1}) + \mu^k X^k$ 的奇异值分解, 即 $Y = U \text{Diag}(\sigma) V^\top$ .
+			\end{theo}
 
-			\paragraph{}
-				\quad 首先来求解(\ref{FixS}), 当固定 $S^k$
+			\begin{proof}
+				首先来求解(\ref{FixS}), 当固定 $S^k$
 				\begin{equation}\label{LagFixS}
 						L(y, S^k, X^k, \mu^k)
 					=	-b^\top y + \mathcal{A}(X^k)^\top y - \langle{X, S^k}\rangle+ \frac{1}{2\mu^k} \lVert{\mathcal{A}^*(y) - S^k}\rVert^2_F
@@ -399,21 +410,18 @@
 					\end{aligned}
 				\end{equation}
 
-			\paragraph{}
 				\quad 由此可以给出(\ref{LagFixS})的梯度
 				\begin{equation}\label{GradFixS}
 						\frac{\partial L(y, S^k, X^k, \mu^k)}{\partial y}
 					=	-b + \mathcal{A}(X^k) + \frac{1}{\mu^k} \mathcal{A}(\mathcal{A}^*(y) - S^k)
 				\end{equation}
 
-			\paragraph{}
 				\quad 令(\ref{GradFixS})式等于0, 可得
-				\begin{equation}\label{dualAY}
+				\begin{equation}
 					y^{k + 1} = \mu^k(b - \mathcal{A}(X^k)) + \mathcal{A}(S^k)
 				\end{equation}
 
-			\paragraph{}
-				\quad 再考虑(\ref{FixY}). 当固定 $y^k$
+				\quad 再考虑(\ref{FixY}). 当固定 $y^{k + 1}$
 				\begin{equation}
 					\begin{split}\label{LagFixY}
 							& L(y^{k + 1},S,X^k,\mu^k)\\
@@ -428,12 +436,15 @@
 					=	\frac{S - Y}{\mu^k}
 				\end{equation}
 
-			\paragraph{}
 				\quad 令(\ref{GradFixY})式等于0, 则可得 $S^{k + 1} = Y$ , 但由约束条件 $\lVert{S}\rVert_2 \leq 1$ , 需对 $Y$ 进行修正, 即
-				\begin{equation}\label{dualAS}
+				\begin{equation}
 					S^{k + 1} = U \text{Diag}(\min \{\sigma, 1\}) V^\top
 				\end{equation}
-				其中 $Y = U \text{Diag}(\sigma) V^\top$ . 根据 $Y$ 的定义, 可以简化 $X^{k + 1}$ 的计算方法
+				其中 $Y = U \text{Diag}(\sigma) V^\top$ .
+			\end{proof}
+
+			\paragraph{}
+				\quad 根据 $Y$ 的定义, 可以简化 $X^{k + 1}$ 的计算方法
 				\begin{equation}\label{dualAX}
 						X^{k + 1}
 					=	\frac{\mu^kX^k + \mathcal{A}^*(y^{k + 1})-S^{k + 1}}{\mu^k}
@@ -771,7 +782,7 @@
 				\end{algo}
 
 
-	\section{FPCA法}
+		\section{FPCA法}
 		\subsection{FPC法}
 			\paragraph{}
 				\quad FPC法是一种基于不动点定理的算法, 可以解决问题(\ref{q5}). 
@@ -970,8 +981,5 @@
 					步6 \quad 计算 $X^{k + 1} = S_{\psi \mu^k}(Y_d)$;\\
 					步7 \quad $k = k + 1$, 转步2;
 				\end{algo}
-		
 
-
-		
 \end{document}
