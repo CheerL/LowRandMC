@@ -2,11 +2,9 @@
 %\documentclass{article}
 
 %---------------------------标题设置----------------------------
-
 	\title{低秩矩阵完整化问题的几种高效解法}
 	\author{林陈冉}
 	\date{\today}
-
 %---------------------------宏包加载----------------------------
 	\usepackage{amsmath}
 	\usepackage{amssymb}
@@ -15,22 +13,19 @@
 		\geometry{left = 2.54cm, right = 2.54cm, top = 3.18cm, bottom = 3.18cm}
 	\usepackage{fancyhdr}
 		\pagestyle{fancy}
-		%\lfoot{\today}
 		\cfoot{\thepage}
-		%\rfoot{林陈冉}
 		\setlength{\parskip}{0.5 \baselineskip}
-
 %---------------------------定理环境----------------------------
-	\newtheorem{theo}{\bf 定理}[section]
-	\newtheorem{define}{\bf 定义}[section]
-	\newtheorem{algo}{\bf 算法}
-	\renewcommand{\proofname}{\bf 证明}
+	\newtheorem{theo}{定理}[section]
+	\newtheorem{define}{定义}[section]
+	\newtheorem{algo}{算法}
+	\renewcommand{\proofname}{证明}
 	\renewcommand{\theequation}{\thesection.\arabic{equation}}
-	%\numberwithin{equation}{section}
+	\numberwithin{equation}{section}
 
 \begin{document}
-	\maketitle
-	\section{简介}
+    \maketitle
+    \section{简介}
 		\subsection{什么是低秩矩阵完整化(low-rank matrix completion)}
 			\paragraph{}
 				\quad 简单来说, 低秩矩阵完整化问题, 就是在仅仅知道矩阵的少部分元素的情况下, 恢复出这个矩阵的所有元素. 这个问题在统计, 图像处理, 计算几何, 机器学习, 信号处理, 模型控制等方面有广泛应用, 比如著名的NetFlix大奖赛问题.
@@ -115,8 +110,7 @@
 
 			\paragraph{}
 				\quad 下面, 将对(\ref{q3}), (\ref{q4}), (\ref{q5})分别给出一种高效的解法.
-
-	\section{交替方向增广Lagrange法}
+        \section{交替方向增广Lagrange法}
 		\subsection{问题转化}
 			\paragraph{}
 				\quad 对于问题(\ref{q3}), 我们考虑它的对偶问题
@@ -264,8 +258,8 @@
 					步6 \quad 计算 $X^{k + 1} = \frac{Y - S^{k + 1}}{\mu^k}$ ;\\
 					步7 \quad 计算 $\mu^{k + 1} = \alpha \mu^k$ , $k = k + 1$,转步2.
 				\end{algo}
-
-	\section{RBR法}
+        
+        \section{RBR法}
 		\subsection{SDP问题与Schur补}
 			\paragraph{}
 				\quad 对于问题(\ref{q4}), 我们可以考虑把它转化为一个半定规划(SDP)问题.
@@ -969,4 +963,5 @@
 						=	\{U V^\top + W \vert U^\top W = 0,WV = 0, \lVert{W}\rVert_2 \leq 1\}
 					\end{equation}
 					其中 $X = U D V^\top$
+	
 \end{document}
