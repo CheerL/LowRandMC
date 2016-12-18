@@ -1,11 +1,7 @@
-\documentclass[UTF8]{ctexart}
+\documentclass[a4paper, UTF8]{ctexart}
 %\documentclass{article}
 
-%---------------------------标题设置----------------------------
 
-	\title{低秩矩阵完整化问题的几种高效解法}
-	\author{林陈冉}
-	\date{\today}
 
 %---------------------------宏包加载----------------------------
 	\usepackage{amsmath}
@@ -19,6 +15,13 @@
 		\cfoot{\thepage}
 		%\rfoot{林陈冉}
 		\setlength{\parskip}{0.5 \baselineskip}
+	\usepackage{hyperref}
+		\hypersetup{colorlinks=false}
+
+%---------------------------标题设置----------------------------
+	\title{低秩矩阵完整化问题的几种高效解法}
+	\author{林陈冉}
+	\date{\today}
 
 %---------------------------定理环境----------------------------
 	\newtheorem{theo}{\bf 定理}[section]
@@ -26,8 +29,9 @@
 	\newtheorem{algo}{\bf 算法}
 	\renewcommand{\proofname}{\bf 证明}
 	\renewcommand{\theequation}{\thesection.\arabic{equation}}
-	%\numberwithin{equation}{section}
+	\numberwithin{equation}{section}
 
+%-----------------------------正文------------------------------
 \begin{document}
 	\maketitle
 	\section{简介}
@@ -58,7 +62,7 @@
 							& \mathcal{A}(X)=b\\
 					\end{split}
 				\end{equation}
-				其中$b = (b_1, \cdots, b_m)\in\mathbb{R}^{m}$ ,
+				其中$b = (b_1, \cdots, b_m) \in \mathbb{R}^{m}$ ,
 				$\mathcal{A}: \mathbb{R}^{p \times q} \rightarrow \mathbb{R}^{m}$ 是线性算子,
 				$\mathcal{A}(X) = (\langle{A_1, X}\rangle, \cdots, \langle{A_m, X}\rangle)$ ,
 				$A_i \in \mathbb{R}^{p \times q}, \forall i = 1, \cdots, m$ ,
@@ -115,6 +119,190 @@
 
 			\paragraph{}
 				\quad 下面, 将对(\ref{q3}), (\ref{q4}), (\ref{q5})分别给出一种高效的解法.
+
+	\section{预备知识}
+		此部分会给出一些阅读本文必备的结论,许多结论将略过证明.
+		\subsection{奇异值分解}
+			\paragraph{}
+				\quad $\forall X \in \mathbb{R}^{p \times q}$ , $X = U D V^\top$ , 其中 $U \in \mathbb{R}^{p \times p}$ , $V \in \mathbb{R}^{q \times q}$ 是正交矩阵, $ D = \text{Diag}(\sigma) \in \mathbb{R}^{p \times q}$ 对角线上为非负实数,其他位置为0的矩阵.
+
+			\paragraph{}
+				\quad 这个分解称为\textbf{奇异值分解(SVD)}, 对角矩阵Diag($\sigma$)的每个对角元素 $\sigma_i$ 都是非负的, 称为矩阵的\textbf{奇异值}, 正交矩阵 $U$ 的列向量称为矩阵的\textbf{左奇异向量}, 正交矩阵 $V$ 的列向量称为矩阵的\textbf{右奇异向量}.
+
+			\paragraph{}
+				\quad 有时也认为 $X = U D V^\top$ , 其中 $U \in \mathbb{R}^{p \times r}$ , $V \in \mathbb{R}^{q \times r}$ 是列正交矩阵, $D \in \mathbb{R}^{r \times r}$ 是非负实对角矩阵,$r = rank(X)$.
+
+
+		\subsection{罚函数}
+			\paragraph{}
+				\quad 对于约束优化问题:
+				\begin{equation}
+					\begin{split}\label{Q}
+						\min_x \quad
+							& f(x)\\
+						\text{s.t.} \quad
+							& c_i(x) = 0, \quad i = 1, \cdots, m_e;\\
+							& c_i(x) \ge 0, \quad i = m_e + 1, \cdots, m
+					\end{split}
+				\end{equation}
+			\paragraph{}
+				\quad 我们可以通过把约束条件平方后, 乘上一个很大的常数 $\mu$ , 再加到目标函数上, 转化为\textbf{罚函数}:
+				\begin{equation}
+					P(x, \mu) = f(x) + \mu \lVert{\bar{c}(x)}\rVert^2_2
+				\end{equation}
+				其中
+				$
+						\bar{c}(x)
+					=	(\bar{c}_1(x), \cdots, \bar{c}_m(x))
+					\in	\mathbb{R}^{m}
+				$ , \quad
+				$\bar{c}_i(x)$如下定义:
+				$
+						\bar{c}_i(x)
+					=	\begin{cases}
+							c_i(x), \quad i \leq m_e\\
+							\max \{0, c_i(x)\}, \quad i > m_e \\
+						\end{cases}
+				$ .
+			\paragraph{}
+				\quad 当 $\mu \rightarrow \infty$ , (\ref{Punish})和原问题(\ref{Q})等价.
+				\begin{equation}\label{Punish}
+					\min_x \quad P(x,\mu)
+				\end{equation}
+
+			\paragraph{}
+				\quad 但在实际中, $\mu$ 无法取到无穷大, 为了克服这一缺点, 可以定义\textbf{增广Lagrange函数}(以下叙述仅考虑等值约束的情况, 即 $m_e = m$ ):
+				\begin{equation}\label{ALag}
+						P(x, \lambda, \mu)
+					=	f(x) - \lambda^\top c(x) + \frac{1}{2} \mu \lVert{c(x)}\rVert^2_2
+				\end{equation}
+				其中 $\lambda$ , $\lambda$ , $\mu$, $c(x) \in \mathbb{R}^{m}$ 给定.
+
+			\paragraph{}
+				\quad (\ref{ALag})等价于以下的\textbf{Powell罚函数}:
+				\begin{equation}\label{Pow}
+						P(x, \theta, \mu)
+					=	f(x) + \frac{1}{2} \mu \lVert{c(x) - \theta}\rVert^2_2
+				\end{equation}
+				其中 $c(x) , \theta \in \mathbb{R}^{m}$ .
+
+			\paragraph{}
+				\quad (\ref{Punish})与(\ref{Pow})只相差一个与 $x$ 无关的常数 $\frac{1}{2} \sigma \lVert{\theta}\rVert^2_2$ .
+
+		\subsection{对偶问题}
+			\paragraph{}
+				\quad 对于约束优化问题(\ref{Q}),它的\textbf{Langrange函数}为:
+				\begin{equation}
+						L(x, \mu, \lambda)
+					=	f(x) + \sum^{m_e}_{i = 1} \mu_i c_i(x) + \sum^{m}_{i = m_e + 1} \lambda_i c_i(x)
+				\end{equation}
+
+			\paragraph{}
+				\quad 定义 $g(\mu, \lambda) = \inf_x L(x, \mu, \lambda)$, 通过这个函数我们可以把(\ref{Q})转化为它的对偶问题:
+				\begin{equation}
+					\begin{split}\label{Dual}
+						\max_{\mu, \lambda} \quad
+							& g(\mu,\lambda)\\
+						\text{s.t.} \quad
+							& \mu \succeq 0
+					\end{split}
+				\end{equation}
+				当满足一定条件(KKT条件)时, (\ref{Dual})和(\ref{Q})是等价的.
+
+		\subsection{次梯度}
+			\paragraph{}
+				\quad $f: E \rightarrow \mathbb{R}^{}$ 是一个定义在 $\mathbb{R}^{n}$ 的凸子集 $E$ 上的实值函数,则所有满足
+				\begin{equation}
+					f(y) - f(x) \geq u(y-x), \quad \forall y \in E
+				\end{equation}
+				的向量 $u$ 称为 $f$ 在 $x$ 点的\textbf{次梯度}, 所有这样的 $u$ 构成的集合称为 $f$ 在 $x$ 点的\textbf{次梯度集}.
+
+			\paragraph{}
+				\quad 次梯度集通常用 $\partial f(x)$ 表示
+				\begin{equation}
+						\partial f(x)
+					=	\{u \in \mathbb{R}^{m} \vert f(y) - f(x) \geq u(y - x), \quad \forall y \in E\}
+				\end{equation}
+				当函数在 $x$ 点可微, $\partial f(x) = \{f^\prime(x)\}$ ; 当函数在 $x$ 点不可微, $\partial f(x)$ 是一个非空的紧凸集.
+
+			\paragraph{}
+				\quad 对于不可微函数或者不可微点, 我们可以采用次梯度替代梯度进行分析. 众所周知, 一个点是最优解的必要条件是该点梯度为0. 相应的,有如下结论:
+			\begin{theo}
+				$x^*$ 是(\ref{Q})问题的最优解的一个必要条件是: $0 \in \partial f(x^*)$ . 特别的, 若 $f$ 是凸函数, 则是充要条件.
+			\end{theo}
+
+		\subsection{矩阵范数}
+			\paragraph{}
+				\quad 以下默认 $A \in \mathbb{R}^{m \times n}$ , $x \in \mathbb{R}^{n}$ , $k = \max \{m, n\}$ , $\lambda(A) = (\lambda_1(A), \cdots, \lambda_k(A)) \in \mathbb{R}^{k}$ 是矩阵 $A$ 的奇异值向量, $\lambda_i(A)$ 是矩阵 $A$ 的第i个奇异值.
+			\subsubsection{诱导-p范数}
+				\paragraph{}
+					\quad 矩阵的\textbf{诱导-p范数}是将矩阵看作线性算子, 由向量的p-范数诱导而来.
+					\[
+						\lVert{A}\rVert_p = \sup_{\lVert{x}\rVert_p \leq 1}\lVert{Ax}\rVert_p
+					\]
+
+				\paragraph{}
+					\quad 常见的有\textbf{2-范数}:
+					\[
+						\lVert{A}\rVert_2 = \max_i \lambda_i(A)
+					\]
+
+				\paragraph{}
+					\quad \textbf{1-范数}, 又称\textbf{列范数}:
+					\[
+						\lVert{A}\rVert_1 = \max_{1 \leq j \leq n}\sum_{i = 1}^m \lvert{a_{ij}}\rvert
+					\]
+
+				\paragraph{}
+					\quad \textbf{$\infty$-范数}, 又称\textbf{行范数}:
+					\[
+						\lVert{A}\rVert_\infty = \max_{1 \leq i \leq m}\sum_{j = 1}^n \lvert{a_{ij}}\rvert
+					\]
+
+			\subsubsection{F-范数}
+				\paragraph{}
+					\quad 矩阵的\textbf{F-范数}定义类似于向量的2-范数:
+					\[
+						\lVert{A}\rVert_F = (\sum_{i, j} a_{ij}^2)^{\frac{1}{2}}
+					\]
+				\paragraph{}
+					\quad 定义矩阵内积 $\langle{A, X}\rangle = tr(A^\top X)$, F-范数与矩阵内积是相容的, 可以看作内积诱导的范数, 即 $\lVert{A}\rVert_F = \langle{A, A}\rangle^{\frac{1}{2}}$ .
+
+			\subsubsection{Schaten-p范数}
+				\paragraph{}
+					\quad 矩阵的\textbf{Schaten-p范数}是p-范数应用与矩阵奇异值向量所得的:
+					\[
+							\lVert{A}\rVert_p
+						=	(\sum_i^k \lambda_i(A)^p)^{\frac{1}{p}}
+						=	\lVert{\lambda(A)}\rVert_p
+					\]
+			
+			\subsubsection{核范数}
+				\paragraph{}
+					\quad 矩阵的\textbf{核范数}, 又称\textbf{迹范数}, 是在 $p = 1$ 时的Schaten-p范数:
+					\[
+							\lVert{A}\rVert_*
+						=	\sum_i^k \lambda_i(X)
+						=	tr(\sqrt{A A^\top})
+						=	\lVert{A}\rVert_{tr}
+					\]
+
+				\paragraph{}
+					\quad 特别的, 当 $A$ 是对称正定的方阵, 则有 $ A = \sqrt{A A^\top}$ , 即
+					\[
+						\lVert{A}\rVert_* = tr(A)
+					\]
+
+				\paragraph{}
+					\quad 核范数 $\lVert{A}\rVert_* = \lVert{\lambda(A)}\rVert_1$ , 而矩阵的秩 $rank(A) = \lVert{\lambda(A)}\rVert_0$ , 由此可以看出, 核范数与秩的关系就是1-范数与0-范数的关系, 故采用核范数来近似秩.
+
+				\paragraph{}
+					\quad 核范数是非光滑函数的, 次梯度集如下
+					\begin{equation}\label{NuNormSubGrad}
+							\partial \lVert{X}\rVert_*
+						=	\{U V^\top + W \vert U^\top W = 0,WV = 0, \lVert{W}\rVert_2 \leq 1\}
+					\end{equation}
+					其中 $X = U D V^\top$
 
 	\section{交替方向增广Lagrange法}
 		\subsection{问题转化}
@@ -786,187 +974,4 @@
 
 
 		
-	\section{补充知识}
-		此部分会给出一些阅读本文必备的结论,许多结论将略过证明.
-		\subsection{奇异值分解}
-			\paragraph{}
-				\quad $\forall X \in \mathbb{R}^{p \times q}$ , $X = U D V^\top$ , 其中 $U \in \mathbb{R}^{p \times p}$ , $V \in \mathbb{R}^{q \times q}$ 是正交矩阵, $ D = \text{Diag}(\sigma) \in \mathbb{R}^{p \times q}$ 对角线上为非负实数,其他位置为0的矩阵.
-
-			\paragraph{}
-				\quad 这个分解称为\textbf{奇异值分解(SVD)}, 对角矩阵Diag($\sigma$)的每个对角元素 $\sigma_i$ 都是非负的, 称为矩阵的\textbf{奇异值}, 正交矩阵 $U$ 的列向量称为矩阵的\textbf{左奇异向量}, 正交矩阵 $V$ 的列向量称为矩阵的\textbf{右奇异向量}.
-
-			\paragraph{}
-				\quad 有时也认为 $X = U D V^\top$ , 其中 $U \in \mathbb{R}^{p \times r}$ , $V \in \mathbb{R}^{q \times r}$ 是列正交矩阵, $D \in \mathbb{R}^{r \times r}$ 是非负实对角矩阵,$r = rank(X)$.
-
-
-		\subsection{罚函数}
-			\paragraph{}
-				\quad 对于约束优化问题:
-				\begin{equation}
-					\begin{split}\label{Q}
-						\min_x \quad
-							& f(x)\\
-						\text{s.t.} \quad
-							& c_i(x) = 0, \quad i = 1, \cdots, m_e;\\
-							& c_i(x) \ge 0, \quad i = m_e + 1, \cdots, m
-					\end{split}
-				\end{equation}
-			\paragraph{}
-				\quad 我们可以通过把约束条件平方后, 乘上一个很大的常数 $\mu$ , 再加到目标函数上, 转化为\textbf{罚函数}:
-				\begin{equation}
-					P(x, \mu) = f(x) + \mu \lVert{\bar{c}(x)}\rVert^2_2
-				\end{equation}
-				其中
-				$
-						\bar{c}(x)
-					=	(\bar{c}_1(x), \cdots, \bar{c}_m(x))
-					\in	\mathbb{R}^{m}
-				$ , \quad
-				$\bar{c}_i(x)$如下定义:
-				$
-						\bar{c}_i(x)
-					=	\begin{cases}
-							c_i(x), \quad i \leq m_e\\
-							\max \{0, c_i(x)\}, \quad i > m_e \\
-						\end{cases}
-				$ .
-			\paragraph{}
-				\quad 当 $\mu \rightarrow \infty$ , (\ref{Punish})和原问题(\ref{Q})等价.
-				\begin{equation}\label{Punish}
-					\min_x \quad P(x,\mu)
-				\end{equation}
-
-			\paragraph{}
-				\quad 但在实际中, $\mu$ 无法取到无穷大, 为了克服这一缺点, 可以定义\textbf{增广Lagrange函数}(以下叙述仅考虑等值约束的情况, 即 $m_e = m$ ):
-				\begin{equation}\label{ALag}
-						P(x, \lambda, \mu)
-					=	f(x) - \lambda^\top c(x) + \frac{1}{2} \mu \lVert{c(x)}\rVert^2_2
-				\end{equation}
-				其中 $\lambda$ , $\lambda$ , $\mu$, $c(x) \in \mathbb{R}^{m}$ 给定.
-
-			\paragraph{}
-				\quad (\ref{ALag})等价于以下的\textbf{Powell罚函数}:
-				\begin{equation}\label{Pow}
-						P(x, \theta, \mu)
-					=	f(x) + \frac{1}{2} \mu \lVert{c(x) - \theta}\rVert^2_2
-				\end{equation}
-				其中 $c(x) , \theta \in \mathbb{R}^{m}$ .
-
-			\paragraph{}
-				\quad (\ref{Punish})与(\ref{Pow})只相差一个与 $x$ 无关的常数 $\frac{1}{2} \sigma \lVert{\theta}\rVert^2_2$ .
-
-		\subsection{对偶问题}
-			\paragraph{}
-				\quad 对于约束优化问题(\ref{Q}),它的\textbf{Langrange函数}为:
-				\begin{equation}
-						L(x, \mu, \lambda)
-					=	f(x) + \sum^{m_e}_{i = 1} \mu_i c_i(x) + \sum^{m}_{i = m_e + 1} \lambda_i c_i(x)
-				\end{equation}
-
-			\paragraph{}
-				\quad 定义 $g(\mu, \lambda) = \inf_x L(x, \mu, \lambda)$, 通过这个函数我们可以把(\ref{Q})转化为它的对偶问题:
-				\begin{equation}
-					\begin{split}\label{Dual}
-						\max_{\mu, \lambda} \quad
-							& g(\mu,\lambda)\\
-						\text{s.t.} \quad
-							& \mu \succeq 0
-					\end{split}
-				\end{equation}
-				当满足一定条件(KKT条件)时, (\ref{Dual})和(\ref{Q})是等价的.
-
-		\subsection{次梯度}
-			\paragraph{}
-				\quad $f: E \rightarrow \mathbb{R}^{}$ 是一个定义在 $\mathbb{R}^{n}$ 的凸子集 $E$ 上的实值函数,则所有满足
-				\begin{equation}
-					f(y) - f(x) \geq u(y-x), \quad \forall y \in E
-				\end{equation}
-				的向量 $u$ 称为 $f$ 在 $x$ 点的\textbf{次梯度}, 所有这样的 $u$ 构成的集合称为 $f$ 在 $x$ 点的\textbf{次梯度集}.
-
-			\paragraph{}
-				\quad 次梯度集通常用 $\partial f(x)$ 表示
-				\begin{equation}
-						\partial f(x)
-					=	\{u \in \mathbb{R}^{m} \vert f(y) - f(x) \geq u(y - x), \quad \forall y \in E\}
-				\end{equation}
-				当函数在 $x$ 点可微, $\partial f(x) = \{f^\prime(x)\}$ ; 当函数在 $x$ 点不可微, $\partial f(x)$ 是一个非空的紧凸集.
-
-			\paragraph{}
-				\quad 对于不可微函数或者不可微点, 我们可以采用次梯度替代梯度进行分析. 众所周知, 一个点是最优解的必要条件是该点梯度为0. 相应的,有如下结论:
-			\begin{theo}
-				$x^*$ 是(\ref{Q})问题的最优解的一个必要条件是: $0 \in \partial f(x^*)$ . 特别的, 若 $f$ 是凸函数, 则是充要条件.
-			\end{theo}
-
-		\subsection{矩阵范数}
-			\paragraph{}
-				\quad 以下默认 $A \in \mathbb{R}^{m \times n}$ , $x \in \mathbb{R}^{n}$ , $k = \max \{m, n\}$ , $\lambda(A) = (\lambda_1(A), \cdots, \lambda_k(A)) \in \mathbb{R}^{k}$ 是矩阵 $A$ 的奇异值向量, $\lambda_i(A)$ 是矩阵 $A$ 的第i个奇异值.
-			\subsubsection{诱导-p范数}
-				\paragraph{}
-					\quad 矩阵的\textbf{诱导-p范数}是将矩阵看作线性算子, 由向量的p-范数诱导而来.
-					\[
-						\lVert{A}\rVert_p = \sup_{\lVert{x}\rVert_p \leq 1}\lVert{Ax}\rVert_p
-					\]
-
-				\paragraph{}
-					\quad 常见的有\textbf{2-范数}:
-					\[
-						\lVert{A}\rVert_2 = \max_i \lambda_i(A)
-					\]
-
-				\paragraph{}
-					\quad \textbf{1-范数}, 又称\textbf{列范数}:
-					\[
-						\lVert{A}\rVert_1 = \max_{1 \leq j \leq n}\sum_{i = 1}^m \lvert{a_{ij}}\rvert
-					\]
-
-				\paragraph{}
-					\quad \textbf{$\infty$-范数}, 又称\textbf{行范数}:
-					\[
-						\lVert{A}\rVert_\infty = \max_{1 \leq i \leq m}\sum_{j = 1}^n \lvert{a_{ij}}\rvert
-					\]
-
-			\subsubsection{F-范数}
-				\paragraph{}
-					\quad 矩阵的\textbf{F-范数}定义类似于向量的2-范数:
-					\[
-						\lVert{A}\rVert_F = (\sum_{i, j} a_{ij}^2)^{\frac{1}{2}}
-					\]
-				\paragraph{}
-					\quad 定义矩阵内积 $\langle{A, X}\rangle = tr(A^\top X)$, F-范数与矩阵内积是相容的, 可以看作内积诱导的范数, 即 $\lVert{A}\rVert_F = \langle{A, A}\rangle^{\frac{1}{2}}$ .
-
-			\subsubsection{Schaten-p范数}
-				\paragraph{}
-					\quad 矩阵的\textbf{Schaten-p范数}是p-范数应用与矩阵奇异值向量所得的:
-					\[
-							\lVert{A}\rVert_p
-						=	(\sum_i^k \lambda_i(A)^p)^{\frac{1}{p}}
-						=	\lVert{\lambda(A)}\rVert_p
-					\]
-			
-			\subsubsection{核范数}
-				\paragraph{}
-					\quad 矩阵的\textbf{核范数}, 又称\textbf{迹范数}, 是在 $p = 1$ 时的Schaten-p范数:
-					\[
-							\lVert{A}\rVert_*
-						=	\sum_i^k \lambda_i(X)
-						=	tr(\sqrt{A A^\top})
-						=	\lVert{A}\rVert_{tr}
-					\]
-
-				\paragraph{}
-					\quad 特别的, 当 $A$ 是对称正定的方阵, 则有 $ A = \sqrt{A A^\top}$ , 即
-					\[
-						\lVert{A}\rVert_* = tr(A)
-					\]
-
-				\paragraph{}
-					\quad 核范数 $\lVert{A}\rVert_* = \lVert{\lambda(A)}\rVert_1$ , 而矩阵的秩 $rank(A) = \lVert{\lambda(A)}\rVert_0$ , 由此可以看出, 核范数与秩的关系就是1-范数与0-范数的关系, 故采用核范数来近似秩.
-
-				\paragraph{}
-					\quad 核范数是非光滑函数的, 次梯度集如下
-					\begin{equation}\label{NuNormSubGrad}
-							\partial \lVert{X}\rVert_*
-						=	\{U V^\top + W \vert U^\top W = 0,WV = 0, \lVert{W}\rVert_2 \leq 1\}
-					\end{equation}
-					其中 $X = U D V^\top$
 \end{document}
