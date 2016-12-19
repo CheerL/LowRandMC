@@ -29,7 +29,7 @@
     \newtheorem{algo}{\bf \textcolor[rgb]{0.8,0,0}{算法}}
     \renewcommand{\proofname}{\bf \textcolor[rgb]{0.8,0,0}{证明}}
 	\renewcommand{\theequation}{\thesection.\arabic{equation}}
-	\numberwithin{equation}{section}                                %以section为计数器标记公式
+	\numberwithin{equation}{section}  %以section为计数器标记公式
 
 %-----------------------------正文------------------------------
 \begin{document}
@@ -39,6 +39,7 @@
             \titlepage
         \end{frame}
     %------- Main-------%
+    \setcounter{section}{0}  %存在起始页时从0开始编号
     \section{简介}\label{section1}
         \subsection{什么是低秩矩阵完整化}
             \begin{frame}[t]{什么是低秩矩阵完整化}
@@ -71,7 +72,7 @@
             \end{frame}
             %--- Next Frame ---%
             \begin{frame}[t]{数学模型}
-                但是(\ref{q1}), (\ref{q2})都是\textbf{"NP-难"}的, 因此需要一定的转化. 这里我们用核范数来近似矩阵的秩, 把(\ref{q1})与(\ref{q2})转化为以下形式:
+                但是(\ref{q1}), (\ref{q2})都是"NP-难"的, 因此需要一定的转化. 这里我们用核范数来近似矩阵的秩, 把(\ref{q1})与(\ref{q2})转化为以下形式:
                 \begin{equation}
                     \begin{split}\label{q3}
                         \min \quad
@@ -97,7 +98,7 @@
                 \begin{itemize}
                     \item 对于(\ref{q3}), 当在某些正则条件下, 若已知元素个数 $\lvert{\Omega}\rvert = m = O(nr \cdot polylog(n))$ , 其中 $n=max(p,q)$ , $polylog$ 是多重对数函数, 则矩阵有很高概率可以恢复.\\
 
-                    \item 对于(\ref{q4}), 将线性映射 $\mathcal{A}$ 的矩阵形式记作 $A$ , 当 $A$ 是一个随机高斯矩阵, 若向量 $b$ 的维数 $m \ge C(r(p + q)log(pq)$ , 其中 $C$ 是一个正的常数, 则矩阵有很高概率可以恢复.
+                    \item 对于(\ref{q4}), 将线性映射 $\mathcal{A}$ 的矩阵形式记作 $A$ , 当 $A$ 是一个随机高斯矩阵, 若向量 $b$ 的维数 $m = O(r(p + q)log(pq))$ , 则矩阵有很高概率可以恢复.
                 \end{itemize}
             \end{frame}
             %--- Next Frame ---%
@@ -107,11 +108,22 @@
                     \min \quad \lVert{X}\rVert_*+ \frac{1}{2\mu} \lVert{\mathcal{A}(X) - b}\rVert_2^2
                 \end{equation}
                 \small{其中 $\mu$ 是某个给定常数.}\normalsize
-
-                下面, 将对(\ref{q3}), (\ref{q4}), (\ref{q5})分别给出一种高效的解法.
             \end{frame}
             %--- Next Frame ---%
-    \section{AAL法}\label{section2}
+            \begin{frame}[t]{数学模型}
+                下面, 将对(\ref{q3}), (\ref{q4}), (\ref{q5})分别给出一种高效的解法.
+
+                \begin{itemize}
+                    \item (\ref{q3}) $\rightarrow$ Alternating Direction Augmented Lagrangian法
+
+                    \item (\ref{q4}) $\rightarrow$ Row By Row法
+
+                    \item (\ref{q5}) $\rightarrow$ Fixed Point Contiuation Apporximate法
+
+                \end{itemize}
+            \end{frame}
+            %--- Next Frame ---%
+    \section{ADAL法}\label{section2}
         \subsection{问题转化}
             \begin{frame}[t]{问题转化}
                 对于问题(\ref{q3}), 我们考虑它的对偶问题
@@ -127,7 +139,7 @@
                 引入一个形式上的变量 $S$ , 将(\ref{dual1})变为如下的等价形式
                 \begin{equation}
                     \begin{split}\label{dual2}
-                        \min_{y \in \mathbb{R}^{m}}
+                        \min_{y \in \mathbb{R}^{m}} \quad
                             & -b^\top y\\
                         \text{s.t.} \quad
                             & \mathcal{A}^*(y) - S = 0\\
@@ -167,11 +179,7 @@
                         =	& \arg \min_{y, S}L(y, S, X^k, \mu^k)
                     \end{split}
                 \end{equation}
-            \end{frame}
-            %--- Next Frame ---%
-        \subsection{交替方向法}
-            \begin{frame}[t]{交替方向法}
-                但实际上, (\ref{dualA})第三式并不容易解, 因此我们考虑使用交替方向法来求解这个方程, 即固定 $S$ 求 $y$ , 再固定 $y$ 求 $S$ .
+                (\ref{dualA})第三式并不容易解, 因此我们考虑使用交替方向法
                 \begin{align}
                         y^{k + 1}
                     =	& \arg \min_{y, S}L(y, S^k, X^k, \mu^k) \label{FixS}\\
@@ -180,6 +188,7 @@
                 \end{align}
             \end{frame}
             %--- Next Frame ---%
+        \subsection{交替方向法}
             \begin{frame}[t]{交替方向法}
                 \begin{theo}
                     当固定 $S^k$ , (\ref{FixS})的最优解为:
@@ -222,7 +231,7 @@
                             & \mathcal{A}(X) = b, X \succ 0
                     \end{split}
                 \end{equation}
-                \small{其中 $b \in \mathbb{R}^{m}$ , $\mathcal{A}(X) = (\langle{A_1, X}\rangle, \cdots, \langle{A_m, X}\rangle)$ , $C, A_i \in S^n$ , $S^n$ 是全体对称矩阵.}\normalsize
+                \small{其中 $b \in \mathbb{R}^{m}$ , $\mathcal{A}(X) = (\langle{A^{(1)} X}\rangle, \cdots, \langle{A^{(m)} X}\rangle)$ , $C, A^{(i)}\in S^n$ , $S^n$ 是全体对称矩阵.}\normalsize
             \end{frame}
             %--- Next Frame ---%
             \begin{frame}[t]{Schur补}
@@ -303,7 +312,7 @@
                         \min_{[\xi; y] \in \mathbb{R}^{n}} \quad
                             & \bar{c}^\top \begin{pmatrix}\xi \\ y\end{pmatrix}\\
                         \text{s.t.} \quad
-                            & \bar{X} \begin{pmatrix}\xi \\ y\end{pmatrix} = \bar{b}\\
+                            & \bar{A} \begin{pmatrix}\xi \\ y\end{pmatrix} = \bar{b}\\
                             & (X/B) \geq \delta
                     \end{split}
                 \end{equation}
@@ -312,45 +321,45 @@
             \begin{frame}[t]{SOCP问题}
                 其中
                 \begin{equation}
-                    \begin{split}\label{SOCPCondition}
-                            \bar{c}
-                        =	\begin{pmatrix} C_{i, i} \\ 2C{i^c, i} \end{pmatrix},
-                            \bar{X}
-                        =	\begin{pmatrix}
-                                X^(1)_{i, i} & 2X^(1)_{i, i^c} \\
-                                \cdots & \cdots \\
-                                X^(m)_{i, i} & X^(m)_{i, i^c}
-                            \end{pmatrix},
-                            \bar{b}
-                        =	\begin{pmatrix}
-                                b_1 - \langle{X^(1)_{i^c, i^c}, B}\rangle \\
-                                \cdots \\
-                                b_m - \langle{X^(m)_{i^c, i^c}, B}\rangle 
-                            \end{pmatrix}
-                    \end{split}
-                \end{equation}
+					\begin{split}\label{SOCPCondition}
+							\bar{c}
+						=	\begin{pmatrix} C_{i, i} \\ 2C{i^c, i} \end{pmatrix} , \quad
+							\bar{A}
+						=	\begin{pmatrix}
+								A^{(1)}_{i, i} & 2A^{(1)}_{i, i^c} \\
+								\cdots & \cdots \\
+								A^{(m)}_{i, i} & 2A^{(m)}_{i, i^c}
+							\end{pmatrix} , \quad
+							\bar{b}
+						=	\begin{pmatrix}
+								b_1 - \langle{A^{(1)}_{i^c, i^c}, B}\rangle \\
+								\cdots \\
+								b_m - \langle{A^{(m)}_{i^c, i^c}, B}\rangle 
+							\end{pmatrix}
+					\end{split}
+				\end{equation}
                 
                 若 $X$ 是半正定的, 即 $X \succeq 0$ , 取 $\delta = 0$; 
                 
                 若 $X$ 是正定的, 即 $X \succ 0$ , 用大于零的数来限制Schur补, 取$\delta > 0$.
             \end{frame}
             %--- Next Frame ---%
-            \begin{frame}[t]{Powell罚函数}
-                考虑(3.7)的Powell罚函数
-                \begin{equation}\label{Powell}
-                        F(X, \theta, \mu)
-                    =	\bar{c}^\top \begin{pmatrix}\xi \\ y\end{pmatrix} + \frac{1}{2\mu} \lVert{\bar{X}[\xi; y] - \bar{b}- \theta}\rVert^2_2
-                \end{equation}
-                其中 $\theta \in \mathbb{R}^{m}$ , $\mu > 0$ 都是是给定的. 记 $\lambda = \theta + \bar{b}$
+            \begin{frame}[t]{罚函数}
+                考虑(\ref{SOCP})的罚函数
+				\begin{equation}\label{Powell}
+						F(X, \mu)
+					=	\bar{c}^\top \begin{pmatrix}\xi \\ y\end{pmatrix} + \frac{1}{2\mu} \lVert{\bar{A}[\xi; y] - \bar{b}}\rVert^2_2
+				\end{equation}
+				其中 $\mu > 0$ 是给定的.
 
                 (\ref{SOCP})等价于以下问题
                 \begin{equation}
                     \begin{split}\label{PowellQ}
-                        \min_{X} \quad
-                            & F(X, \lambda, \mu) = \bar{c}^\top \begin{pmatrix}\xi \\ y\end{pmatrix} + \frac{1}{2\mu} \lVert{\bar{X}[\xi; y] - \lambda}\rVert^2_2\\
-                        \text{s.t.} \quad
-                            & X \succeq 0
-                    \end{split}
+						\min_{X} \quad
+							& F(X, \mu)\\
+						\text{s.t.} \quad
+							& X \succeq 0
+					\end{split}
                 \end{equation} 
             \end{frame}
             %--- Next Frame ---%
@@ -380,7 +389,7 @@
                             \min_X \quad
                                 & tr(X)\\
                             \text{s.t.} \quad
-                                & X =	\begin{pmatrix}
+                                & X = \begin{pmatrix}
                                             X_1 & W \\
                                             W^\top & X_2
                                         \end{pmatrix} \succ 0\\
@@ -424,32 +433,32 @@
                     =	X_{i, i}
                 $ .
                 
-                对照SOCP问题的罚函数形式(\ref{PowellQ}), 可以给出 $\bar{X} \begin{pmatrix}\xi \\ y\end{pmatrix}, \lambda$ 和 $\bar{c}$ 的显式表达
-                \begin{equation}\label{BigRBRCondition2}
-                        \lambda
-                    = 	\begin{cases}
-                            (M_{i,\alpha_i-p})^\top,&i\leq p\\
-                            M_{\alpha_i,i-p}\;,&p<i\leq n
-                        \end{cases}
-                        , \quad
-                        \bar{X} \begin{pmatrix} \xi \\ y \end{pmatrix}
-                    =	y_1
-                        , \quad
-                        \bar{c}
-                    =	(1, \overbrace{0, \cdots, 0}^{n - 1})
-                \end{equation}
+                对照SOCP问题的罚函数形式(\ref{PowellQ}), 同时,可以给出 $\bar{A} \begin{pmatrix}\xi \\ y\end{pmatrix}, \bar{b}$ 和 $\bar{c}$ 的显式表达
+				\begin{equation}\label{BigRBRCondition2}
+						\bar{b}
+					= 	\begin{cases}
+							(M_{i,\alpha_i-p})^\top,&i\leq p\\
+							M_{\alpha_i,i-p}\;,&p<i\leq n
+						\end{cases}
+						, \quad
+						\bar{A} \begin{pmatrix} \xi \\ y \end{pmatrix}
+					=	y_1
+						, \quad
+						\bar{c}
+					=	(1, \overbrace{0, \cdots, 0}^{n - 1})
+				\end{equation}
             \end{frame}
             %--- Next Frame ---%
             \begin{frame}[t]{用SDP和RBR法补全矩阵}
-                故(\ref{PowellQ})化为以下的形式
-                \begin{equation}
-                    \begin{split}\label{TrueRBRQ}
-                        \min \quad
-                            & \xi + \frac{1}{2\mu} \lVert{y_1 - \lambda}\rVert^2_2\\
-                        \text{s.t.} \quad
-                            & \xi - y^\top B^{-1} y \geq \delta
-                    \end{split}
-                \end{equation}
+                故(\ref{PowellQ})化为以下形式
+				\begin{equation}
+					\begin{split}\label{TrueRBRQ}
+						\min \quad
+							& \xi + \frac{1}{2\mu} \lVert{y_1 - \bar{b}}\rVert^2_2\\
+						\text{s.t.} \quad
+							& \xi - y^\top B^{-1} y \geq \delta
+					\end{split}
+				\end{equation}
 
                 现在只需要解这个问题的最优解, 即可得到矩阵 $X$ 的第 $i$ 行和第 $i$ 列, 当 $i$ 循环取遍 $1$ 到 $n$ , 就可以得到原问题(\ref{BigRBR})的最优解, 从而求得目标矩阵 $W$ .
             \end{frame}
@@ -459,9 +468,9 @@
                     问题(\ref{TrueRBRQ})的最优解为
                     \begin{equation}
                         \begin{split}\label{TrueRBRA}
-                            y_1 = & (2 \mu I + X_{\alpha, \alpha})^{-1} X_{\alpha, \alpha}\tilde{b}\\
-                            y_2 = & \frac{1}{2 \mu} X_{\beta, \alpha} (\lambda - y_1)\\
-                            \xi = & \frac{1}{2 \mu} y_1^\top (\lambda - y_1) + \delta
+                            y_1 = & (2 \mu I + X_{\alpha, \alpha})^{-1} X_{\alpha, \alpha}\\
+                            y_2 = & \frac{1}{2 \mu} X_{\beta, \alpha} (\bar{b} - y_1)\\
+                            \xi = & \frac{1}{2 \mu} y_1^\top (\bar{b} - y_1) + \delta
                         \end{split}
                     \end{equation}
                 \end{theo}
@@ -500,7 +509,7 @@
             \end{frame}
             %--- Next Frame ---%
             \begin{frame}[t]{FPC法}
-                (\ref{SubGrad2})恰好是 $\lVert{X}\rVert_* + \frac{1}{2} \Vert{X - Y}\Vert^2_F$ 的次梯度, 即(\ref{q4})等价于 
+                (\ref{SubGrad2})恰好是 $\psi \mu \lVert{X}\rVert_* + \frac{1}{2} \Vert{X - Y}\Vert^2_F$ 的次梯度, 即(\ref{q4})等价于 
                 \begin{equation}\label{FPCQ}
                     \min \psi \mu \lVert{X}\rVert_* + \frac{1}{2} \Vert{X - Y}\Vert^2_F
                 \end{equation}
