@@ -1,4 +1,4 @@
-\documentclass[slidestop,compress,mathserif,UTF8]{beamer}
+\documentclass[slidestop, compress, mathserif, UTF8]{beamer}
 
 %---------------------------宏包加载----------------------------
 	\usepackage{amsmath}
@@ -9,14 +9,15 @@
     \usepackage{hyperref}
     \usepackage{shapepar}
     \usepackage{tikz}
+
 %---------------------------外观设置----------------------------
-    %\usetheme{Szeged} % Beamer theme v 3.0
-    \useoutertheme[footline=institutetitle, subsection=false]{miniframes} %无subsection的顶部导航栏
-    \usecolortheme{beaver} % Beamer color theme
-    \beamertemplateshadingbackground{blue!5}{yellow!10} %渐变
-    \hypersetup{colorlinks=false} %去除超链接颜色
-    \setlength{\parskip}{0.5 \baselineskip}  %行距
-    %\useinnertheme[shadow]{rounded}
+    %\usetheme{Szeged}                                                      % Beamer 3.0 主题
+    \useoutertheme[footline=institutetitle, subsection=false]{miniframes}   %无subsection的顶部导航栏
+    \usecolortheme{beaver}                                                  % Beamer 色彩主题
+    \beamertemplateshadingbackground{blue!5}{yellow!10}                     %渐变
+    \hypersetup{colorlinks=false}                                           %去除超链接颜色
+    \setlength{\parskip}{0.5 \baselineskip}                                 %行距
+    %\useinnertheme[shadow]{rounded}                                        %圆角及影音
 
 %---------------------------标题设置----------------------------
     \title{低秩矩阵完整化问题的几种高效解法}
@@ -24,22 +25,21 @@
     \institute{中国科学院大学}
 
 %---------------------------定理环境----------------------------
-    \newtheorem{theo}{\bf \textcolor[rgb]{0.8,0,0}{定理}}[section]  %[rgb]{0.8,0,0}是与beaver接近的红色
+    \newtheorem{theo}{\bf \textcolor[rgb]{0.8,0,0}{定理}}[section]          %[rgb]{0.8,0,0}是与beaver接近的红色
     \newtheorem{define}{\bf \textcolor[rgb]{0.8,0,0}{定义}}[section] 
     \newtheorem{algo}{\bf \textcolor[rgb]{0.8,0,0}{算法}}
     \renewcommand{\proofname}{\bf \textcolor[rgb]{0.8,0,0}{证明}}
-	\renewcommand{\theequation}{\thesection.\arabic{equation}}
-	\numberwithin{equation}{section}  %以section为计数器标记公式
+	\numberwithin{equation}{section}                                        %以section为计数器标记公式
 
 %-----------------------------正文------------------------------
-\begin{document}
+\begin{document}                                %开始正文
     %--- Title Frame ---%
-    \section*{Start}
+    \section*{Start}                            %起始章节, 不列入目录
         \begin{frame}
             \titlepage
         \end{frame}
     %------- Main-------%
-    \setcounter{section}{0}  %存在起始页时从0开始编号
+    \setcounter{section}{0}                     %存在起始章节时, 从0开始对章节编号
     \section{简介}\label{section1}
         \subsection{什么是低秩矩阵完整化}
             \begin{frame}[t]{什么是低秩矩阵完整化}
@@ -633,10 +633,11 @@
                 \end{algo}
             \end{frame}
     %--- End Frame ---%
-    \section*{End}
+    \section*{End}                              %结束章节, 不列入目录
         \begin{frame}
-            \vspace{35mm}
-            \centering
-                \includegraphics{Thanks.pdf}
+            \vspace{35mm}                       %垂直距离
+            %\hspace{10mm}                      %水平距离
+            \centering                          %居中
+                \includegraphics{Thanks.pdf}    %插入图片
         \end{frame}
-\end{document}
+\end{document}                                  %结束正文

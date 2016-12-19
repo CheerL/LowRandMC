@@ -8,31 +8,31 @@
 	\usepackage{amssymb}
 	\usepackage{amsthm}
 	\usepackage{geometry}
-		\geometry{left = 2.54cm, right = 2.54cm, top = 3.18cm, bottom = 3.18cm}
+		\geometry{left = 2.54cm, right = 2.54cm,
+			top = 3.18cm, bottom = 3.18cm}			%页边距设置
 	\usepackage{fancyhdr}
 		\pagestyle{fancy}
-		%\lfoot{\today}
-		\cfoot{\thepage}
-		%\rfoot{林陈冉}
-		\setlength{\parskip}{0.5 \baselineskip}
-	\usepackage{hyperref}
-		\hypersetup{colorlinks=false}
+		%\lfoot{\today}   							%左页脚
+		\cfoot{\thepage}							%中页脚
+		%\rfoot{林陈冉}	 						 %右页脚
+		\setlength{\parskip}{0.5 \baselineskip}		%段距
+	\usepackage{hyperref}  							%打开超链接
+		\hypersetup{colorlinks=false}				%取消超链接颜色
 %---------------------------标题设置----------------------------
 	\title{低秩矩阵完整化问题的几种高效解法}
 	\author{林陈冉}
 	\date{\today}
 
 %---------------------------定理环境----------------------------
-	\newtheorem{theo}{\bf 定理}[section]
+	\newtheorem{theo}{\bf 定理}[section]			  %新建定理环境, 标题为"定理", 以section为计数器标记
 	\newtheorem{define}{\bf 定义}[section]
 	\newtheorem{algo}{\bf 算法}
-	\renewcommand{\proofname}{\bf 证明}
-	\renewcommand{\theequation}{\thesection.\arabic{equation}}
-	\numberwithin{equation}{section}  %以section为计数器标记公式
+	\renewcommand{\proofname}{\bf 证明}			  %重命名定理环境, 标题为"证明"
+	\numberwithin{equation}{section}				%以section为计数器标记公式
 
 %-----------------------------正文------------------------------
-\begin{document}
-	\maketitle
+\begin{document}									%开始正文
+	\maketitle										%生成标题
 	\section{简介}
 		\subsection{什么是低秩矩阵完整化(low-rank matrix completion)}
 			\paragraph{}
@@ -980,4 +980,4 @@
 					步7 \quad $k = k + 1$, 转步2;
 				\end{algo}
 
-\end{document}
+\end{document}										%结束正文
