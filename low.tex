@@ -47,7 +47,7 @@
 							& X_{ij}=M_{ij},\forall(i,j)\in\Omega\\
 					\end{split}
 				\end{equation}
-				其中 $X, M\in\mathbb{R}^{p\times q}$ , $\Omega$ 是已知元素的下标 $(i, j)$ 构成的集合, $\lvert{\Omega}\rvert = m$ .
+				其中 $X, M\in\mathbb{R}^{p \times q}$ , $\Omega$ 是已知元素的下标 $(i, j)$ 构成的集合, $\lvert{\Omega}\rvert = m$ .
 
 			\paragraph{}
 				\quad 在一些情况下, (\ref{q1})等价于线性约束问题:
@@ -102,7 +102,7 @@
 				\quad 很自然的, 一个重要的问题是: (\ref{q1})与(\ref{q3}), 或者(\ref{q2})与(\ref{q4})什么时候等价? 略过证明, 直接描述以下重要的结论:
 
 			\paragraph{}
-				\quad 对于(\ref{q3}), Candes和陶哲轩等给出了一个证明. 当满足某些正则条件, 若已知元素个数 $\lvert{\Omega}\rvert = m = O(nr \cdot polylog(n))$ , 其中 $n=max(p,q)$ , $polylog$ 是多重对数函数, 则矩阵有很高概率可以通过(\ref{q3})恢复.
+				\quad 对于(\ref{q3}), Candes和陶哲轩等给出了一个证明. 当满足某些正则条件, 若已知元素个数 $\lvert{\Omega}\rvert = m = O(nr \cdot polylog(n))$ , 其中 $n = \max \{p,q\}$ , $polylog$ 是多重对数函数, 则矩阵有很高概率可以通过(\ref{q3})恢复.
 
 			\paragraph{}
 				\quad 对于(\ref{q4}), Recht等给出了一个证明. 将线性映射 $\mathcal{A}$ 的矩阵形式记作 $A$ , 即 $\mathcal{A}(X) = A\text{vec}(X)$ , 其中 $\text{vec}(X) \in \mathbb{R}^{pq}$ 为矩阵 $X$ 的向量化. 当 $A$ 是一个随机高斯矩阵, 若向量 $b$ 的维数 $m = O(r(p + q)log(pq))$ , 则矩阵有很高概率可以通过(\ref{q4})恢复.
@@ -778,7 +778,7 @@
 				\end{algo}
 
 
-		\section{FPCA法}
+	\section{FPCA法}
 		\subsection{FPC法}
 			\paragraph{}
 				\quad FPC法是一种基于不动点定理的算法, 可以解决问题(\ref{q5}). 
