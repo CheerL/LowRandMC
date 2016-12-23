@@ -17,7 +17,7 @@
     \beamertemplateshadingbackground{blue!5}{yellow!10}                     %渐变
     \hypersetup{colorlinks=false}                                           %去除超链接颜色
     \setlength{\parskip}{0.5 \baselineskip}                                 %行距
-    %\useinnertheme[shadow]{rounded}                                        %圆角及影音
+    %\useinnertheme[shadow]{rounded}                                        %圆角及阴影
 
 %---------------------------标题设置----------------------------
     \title{低秩矩阵完整化问题的几种高效解法}
@@ -632,12 +632,37 @@
                     步7 \quad $k = k + 1$, 转步2;
                 \end{algo}
             \end{frame}
+            %--- Next Frame ---%
+    \section{数值实验结果}\label{section5}
+        \subsection{数值实验结果}
+            \begin{frame}[t]{FPCA对比SDPT3}
+                \centering
+                    \includegraphics[width=10cm,height=7cm]{src//1.png}
+            \end{frame}
+            %--- Next Frame ---%
+            \begin{frame}[t]{FPCA对比SVT(简单情况)}
+                \centering
+                    \includegraphics[width=10cm,height=6cm]{src//2.png}
+            \end{frame}
+            %--- Next Frame ---%
+            \begin{frame}[t]{FPCA对比SVT(复杂情况)}
+                \vspace{10mm}
+                \centering
+                    \includegraphics[width=10cm,height=5cm]{src//3.png}
+            \end{frame}
+            %--- Next Frame ---%
+            \begin{frame}[t]{RBR}
+                \centering
+                    \includegraphics[width=5cm,height=7cm]{src//4.png}
+            \end{frame}
+            %--- Next Frame ---%
     %--- End Frame ---%
     \section*{End}                              %结束章节, 不列入目录
         \begin{frame}
             \vspace{35mm}                       %垂直距离
             %\hspace{10mm}                      %水平距离
             \centering                          %居中
-                \includegraphics{Thanks.pdf}    %插入图片
+                \includegraphics{src//Thanks.pdf}    %插入图片
         \end{frame}
 \end{document}                                  %结束正文
+
