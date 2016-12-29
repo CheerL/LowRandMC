@@ -23,6 +23,7 @@
 
 %---------------------------定理环境----------------------------
 	\newtheorem{theo}{\bf 定理}[section]			  %新建定理环境, 标题为"定理", 以section为计数器标记
+	\newtheorem{prop}{\bf 命题}[section]			  %新建定理环境, 标题为"定理", 以section为计数器标记
 	\newtheorem{define}{\bf 定义}[section]
 	\newtheorem{algo}{\bf 算法}
 	\renewcommand{\proofname}{\bf 证明}			  %重命名定理环境, 标题为"证明"
@@ -118,7 +119,6 @@
 				\quad 下面, 将对(\ref{q3}), (\ref{q4}), (\ref{q5})分别给出一种高效的解法.
 
 	\section{预备知识}
-		此部分会给出一些阅读本文必备的结论,许多结论将略过证明.
 		\subsection{奇异值分解}
 			\paragraph{}
 				\quad $\forall X \in \mathbb{R}^{p \times q}$ , $X = U D V^\top$ , 其中 $U \in \mathbb{R}^{p \times p}$ , $V \in \mathbb{R}^{q \times q}$ 是正交矩阵, $ D = \text{Diag}(\sigma) \in \mathbb{R}^{p \times q}$ 对角线上为非负实数,其他位置为0的矩阵.
@@ -128,105 +128,6 @@
 
 			\paragraph{}
 				\quad 有时也认为 $X = U D V^\top$ , 其中 $U \in \mathbb{R}^{p \times r}$ , $V \in \mathbb{R}^{q \times r}$ 是列正交矩阵, $D \in \mathbb{R}^{r \times r}$ 是非负实对角矩阵, $r = rank(X)$.
-
-
-		\subsection{罚函数}
-			\paragraph{}
-				\quad 对于约束优化问题:
-				\begin{equation}
-					\begin{split}\label{Q}
-						\min_x \quad
-							& f(x)\\
-						\text{s.t.} \quad
-							& c_i(x) = 0, \quad i = 1, \cdots, m_e;\\
-							& c_i(x) \ge 0, \quad i = m_e + 1, \cdots, m
-					\end{split}
-				\end{equation}
-			\paragraph{}
-				\quad 我们可以通过把约束条件平方后, 乘上一个很大的常数 $\mu$ , 再加到目标函数上, 转化为罚函数:
-				\begin{equation}
-					P(x, \mu) = f(x) + \mu \lVert{\bar{c}(x)}\rVert^2_2
-				\end{equation}
-				其中
-				$
-						\bar{c}(x)
-					=	(\bar{c}_1(x), \cdots, \bar{c}_m(x))
-					\in	\mathbb{R}^{m}
-				$ , \quad
-				$\bar{c}_i(x)$如下定义:
-				$
-						\bar{c}_i(x)
-					=	\begin{cases}
-							c_i(x), \quad i \leq m_e\\
-							\max \{0, c_i(x)\}, \quad i > m_e \\
-						\end{cases}
-				$ .
-			\paragraph{}
-				\quad 当 $\mu \rightarrow \infty$ , (\ref{Punish})和原问题(\ref{Q})等价.
-				\begin{equation}\label{Punish}
-					\min_x \quad P(x,\mu)
-				\end{equation}
-
-			\paragraph{}
-				\quad 但在实际中, $\mu$ 无法取到无穷大, 为了克服这一缺点, 可以定义增广Lagrange函数(以下叙述仅考虑等值约束的情况, 即 $m_e = m$ ):
-				\begin{equation}\label{ALag}
-						P(x, \lambda, \mu)
-					=	f(x) - \lambda^\top c(x) + \frac{1}{2} \mu \lVert{c(x)}\rVert^2_2
-				\end{equation}
-				其中 $\lambda$ , $\lambda$ , $\mu$, $c(x) \in \mathbb{R}^{m}$ 给定.
-
-			\paragraph{}
-				\quad (\ref{ALag})等价于以下的Powell罚函数:
-				\begin{equation}\label{Pow}
-						P(x, \theta, \mu)
-					=	f(x) + \frac{1}{2} \mu \lVert{c(x) - \theta}\rVert^2_2
-				\end{equation}
-				其中 $c(x) , \theta \in \mathbb{R}^{m}$ .
-
-			\paragraph{}
-				\quad (\ref{Punish})与(\ref{Pow})只相差一个与 $x$ 无关的常数 $\frac{1}{2} \sigma \lVert{\theta}\rVert^2_2$ .
-
-		\subsection{对偶问题}
-			\paragraph{}
-				\quad 对于约束优化问题(\ref{Q}),它的Langrange函数为:
-				\begin{equation}
-						L(x, \mu, \lambda)
-					=	f(x) + \sum^{m_e}_{i = 1} \mu_i c_i(x) + \sum^{m}_{i = m_e + 1} \lambda_i c_i(x)
-				\end{equation}
-
-			\paragraph{}
-				\quad 定义 $g(\mu, \lambda) = \inf_x L(x, \mu, \lambda)$, 通过这个函数我们可以把(\ref{Q})转化为它的对偶问题:
-				\begin{equation}
-					\begin{split}\label{Dual}
-						\max_{\mu, \lambda} \quad
-							& g(\mu,\lambda)\\
-						\text{s.t.} \quad
-							& \mu \succeq 0
-					\end{split}
-				\end{equation}
-				当满足一定条件(KKT条件)时, (\ref{Dual})和(\ref{Q})是等价的.
-
-		\subsection{次梯度}
-			\paragraph{}
-				\quad $f: E \rightarrow \mathbb{R}^{}$ 是一个定义在 $\mathbb{R}^{n}$ 的凸子集 $E$ 上的实值函数,则所有满足
-				\begin{equation}
-					f(y) - f(x) \geq u(y-x), \quad \forall y \in E
-				\end{equation}
-				的向量 $u$ 称为 $f$ 在 $x$ 点的次梯度, 所有这样的 $u$ 构成的集合称为 $f$ 在 $x$ 点的次梯度集.
-
-			\paragraph{}
-				\quad 次梯度集通常用 $\partial f(x)$ 表示
-				\begin{equation}
-						\partial f(x)
-					=	\{u \in \mathbb{R}^{m} \vert f(y) - f(x) \geq u(y - x), \quad \forall y \in E\}
-				\end{equation}
-				当函数在 $x$ 点可微, $\partial f(x) = \{f^\prime(x)\}$ ; 当函数在 $x$ 点不可微, $\partial f(x)$ 是一个非空的紧凸集.
-
-			\paragraph{}
-				\quad 对于不可微函数或者不可微点, 我们可以采用次梯度替代梯度进行分析. 众所周知, 一个点是最优解的必要条件是该点梯度为0. 相应的,有如下结论:
-			\begin{theo}
-				$x^*$ 是(\ref{Q})问题的最优解的一个必要条件是: $0 \in \partial f(x^*)$ . 特别的, 若 $f$ 是凸函数, 则是充要条件.
-			\end{theo}
 
 		\subsection{矩阵范数}
 			\paragraph{}
@@ -293,18 +194,115 @@
 				\paragraph{}
 					\quad 核范数 $\lVert{A}\rVert_* = \lVert{\sigma(A)}\rVert_1$ , 而矩阵的秩 $rank(A) = \lVert{\sigma(A)}\rVert_0$ , 由此可以看出, 核范数与秩的关系就是1-范数与0-范数的关系, 故采用核范数来近似秩.
 
-				\paragraph{}
-					\quad 核范数是非光滑函数的, 次梯度集如下
-					\begin{equation}\label{NuNormSubGrad}
-							\partial \lVert{X}\rVert_*
-						=	\{U V^\top + W \vert U^\top W = 0,WV = 0, \lVert{W}\rVert_2 \leq 1\}
-					\end{equation}
-					其中 $X = U D V^\top$
+		\subsection{罚函数}
+			\paragraph{}
+				\quad 对于约束优化问题:
+				\begin{equation}
+					\begin{split}\label{Q}
+						\min_x \quad
+							& f(x)\\
+						\text{s.t.} \quad
+							& c_i(x) = 0, \quad i = 1, \cdots, m_e;\\
+							& c_i(x) \ge 0, \quad i = m_e + 1, \cdots, m
+					\end{split}
+				\end{equation}
+			\paragraph{}
+				\quad 我们可以通过把约束条件平方后, 乘上一个很大的常数 $\mu$ , 再加到目标函数上, 转化为罚函数:
+				\begin{equation}
+					P(x, \mu) = f(x) + \mu \lVert{\bar{c}(x)}\rVert^2_2
+				\end{equation}
+				其中
+				$
+						\bar{c}(x)
+					=	(\bar{c}_1(x), \cdots, \bar{c}_m(x))
+					\in	\mathbb{R}^{m}
+				$ , \quad
+				$\bar{c}_i(x)$如下定义:
+				$
+						\bar{c}_i(x)
+					=	\begin{cases}
+							c_i(x), \quad i \leq m_e\\
+							\max \{0, c_i(x)\}, \quad i > m_e \\
+						\end{cases}
+				$ .
+			\paragraph{}
+				\quad 当 $\mu \rightarrow \infty$ , (\ref{Punish})和原问题(\ref{Q})等价.
+				\begin{equation}\label{Punish}
+					\min_x \quad P(x,\mu)
+				\end{equation}
+
+			\paragraph{}
+				\quad 但在实际中, $\mu$ 无法取到无穷大, 为了克服这一缺点, 可以定义增广Lagrange函数(以下叙述仅考虑等值约束的情况, 即 $m_e = m$ ):
+				\begin{equation}\label{ALag}
+						P(x, \lambda, \mu)
+					=	f(x) - \lambda^\top c(x) + \frac{1}{2} \mu \lVert{c(x)}\rVert^2_2
+				\end{equation}
+				其中 $\lambda$ , $\lambda$ , $\mu$, $c(x) \in \mathbb{R}^{m}$ 给定.
+
+			\paragraph{}
+				\quad (\ref{ALag})等价于以下的Powell罚函数:
+				\begin{equation}\label{Pow}
+						P(x, \theta, \mu)
+					=	f(x) + \frac{1}{2} \mu \lVert{c(x) - \theta}\rVert^2_2
+				\end{equation}
+				其中 $c(x) , \theta \in \mathbb{R}^{m}$ .
+
+			\paragraph{}
+				\quad (\ref{Punish})与(\ref{Pow})只相差一个与 $x$ 无关的常数 $\frac{1}{2} \sigma \lVert{\theta}\rVert^2_2$ .
+
+		\subsection{对偶问题}
+			\paragraph{}
+				\quad 对于约束优化问题(\ref{Q}),它的Langrange函数为:
+				\begin{equation}
+						L(x, \mu, \lambda)
+					=	f(x) + \sum^{m_e}_{i = 1} \mu_i c_i(x) + \sum^{m}_{i = m_e + 1} \lambda_i c_i(x)
+				\end{equation}
+
+			\paragraph{}
+				\quad 定义 $g(\mu, \lambda) = \min_x L(x, \mu, \lambda)$, 通过这个函数我们可以把(\ref{Q})转化为它的对偶问题:
+				\begin{equation}
+					\begin{split}\label{Dual}
+						\max_{\mu, \lambda} \quad
+							& g(\mu,\lambda)\\
+						\text{s.t.} \quad
+							& \mu \succeq 0
+					\end{split}
+				\end{equation}
+				当满足一定条件(KKT条件)时, (\ref{Dual})和(\ref{Q})是等价的.
+
+		\subsection{次梯度}
+			\paragraph{}
+				\quad $f: E \rightarrow \mathbb{R}^{}$ 是一个定义在 $\mathbb{R}^{n}$ 的凸子集 $E$ 上的实值函数,则所有满足
+				\begin{equation}
+					f(y) - f(x) \geq u(y-x), \quad \forall y \in E
+				\end{equation}
+				的向量 $u$ 称为 $f$ 在 $x$ 点的次梯度, 所有这样的 $u$ 构成的集合称为 $f$ 在 $x$ 点的次梯度集.
+
+			\paragraph{}
+				\quad 次梯度集通常用 $\partial f(x)$ 表示
+				\begin{equation}
+						\partial f(x)
+					=	\{u \in \mathbb{R}^{m} \vert f(y) - f(x) \geq u(y - x), \quad \forall y \in E\}
+				\end{equation}
+				当函数在 $x$ 点可微, $\partial f(x) = \{f^\prime(x)\}$ ; 当函数在 $x$ 点不可微, $\partial f(x)$ 是一个非空的紧凸集.
+
+			\paragraph{}
+				\quad 对于不可微函数或者不可微点, 我们可以采用次梯度替代梯度进行分析. 众所周知, 一个点是最优解的必要条件是该点梯度为0. 相应的,有如下结论:
+			\begin{theo}
+				$x^*$ 是(\ref{Q})问题的最优解的一个必要条件是: $0 \in \partial f(x^*)$ . 特别的, 若 $f$ 是凸函数, 则是充要条件.
+			\end{theo}
+			\paragraph{}
+				\quad 特别指出, 核范数是非光滑函数的, 次梯度集如下
+				\begin{equation}\label{NuNormSubGrad}
+						\partial \lVert{X}\rVert_*
+					=	\{U V^\top + W \vert U^\top W = 0,WV = 0, \lVert{W}\rVert_2 \leq 1\}
+				\end{equation}
+				其中 $X = U D V^\top$
 
 	\section{交替方向增广Lagrange法}
-		\subsection{问题转化}
-			\paragraph{}
-				\quad 对于问题(\ref{q3}), 我们考虑它的对偶问题
+		\subsection{问题转化}			
+			\begin{prop}
+				问题(\ref{q3})的对偶问题是
 				\begin{equation}
 					\begin{split}\label{dual1}
 						\max_{y \in \mathbb{R}^{m}} \quad
@@ -313,7 +311,33 @@
 							& \lVert{\mathcal{A}^*(y)}\rVert_2 \le 1\\
 					\end{split}
 				\end{equation}
+			\end{prop}
 
+			\begin{proof}
+				问题(\ref{q3})的拉格朗日函数为 
+				\begin{equation}\label{q3LG}
+					L(x, y) = \Vert{X}\Vert_* - (\mathcal{A}(X) - b)^\top y
+				\end{equation}
+				其中 $y \in \mathbb{R}^m$ . 由于 $\Vert{X}\Vert_*$ 不光滑, 我们考虑(\ref{q3LG})的次梯度集. 又(\ref{q3LG})是凸函数, 函数在某点取到极值, 等价于 $0$ 属于该点的次梯度集, 即 
+				\[
+					0 \in \partial \Vert{X}\Vert_* - \mathcal{A}^*(y)
+				\]
+				这说明 $\exists W$ , $\Vert{W}\Vert_2 \le 1$ , $\mathcal{A}^*(y) = U V ^\top + W$ , 其中 $X = U D V ^\top$ . 由 $\Vert{W}\Vert_2 \le 1$ 易知 $\Vert{\mathcal{A}^*(y)}\Vert_2 \le 1$.
+				
+				由核范数次梯度的定义, $U ^\top \mathcal{A}^*(y) = V ^\top$ , $\mathcal{A}^*(y) V = U$ , 即 $\mathcal{A}^*(y) = U V ^\top$ , 那么可以知道
+				\begin{equation}
+					\begin{split}
+							g(y)
+						=	& \min_x L(x, y)\\
+						=	& \Vert{X}\Vert_* - \mathcal{A}(X)^\top y + b ^\top y\\
+						=	& \Vert{U D V ^\top}\Vert_* - \langle{U D V ^\top},{\mathcal{A}^*(y)}\rangle + b ^\top y \\
+						=	& tr(D) - tr(V D ^\top U ^\top U V ^\top) + b ^\top y \\
+						=	& b ^\top y 
+					\end{split}
+				\end{equation}
+				由此我们可以得到结论, 即(\ref{q3})的对偶是(\ref{dual1}).
+			\end{proof}
+				
 			\paragraph{}
 				\quad 引入一个形式上的变量 $S$ , 将(\ref{dual1})变为如下的等价形式
 				\begin{equation}
@@ -397,12 +421,12 @@
 				则它对y的梯度
 				\begin{equation}
 					\begin{aligned}
-							& \frac{\partial \lVert{T}\rVert^2_F}{\partial y}\\
+							\frac{\partial \lVert{T}\rVert^2_F}{\partial y}
 						=	& \frac{\partial \sum_{i, j}(\mathcal{A}_{ij}^\top y - S^k_{ij})^2}{\partial y}\\
 						=	& \sum_{i, j}\frac{\partial (\mathcal{A}_{ij}^\top y - S^k_{ij})^2}{\partial y} \\
 						=	& 2\sum_{i, j}(\mathcal{A}_{ij}^\top y - S^k_{ij}) \mathcal{A}_{ij}\\
-						=	& 2(\sum_{i, j}T_{ij} A_{k_{ij}})\\
-						=	& 2(\langle{A_i, T}\rangle)\\
+						=	& 2(\sum_{i, j}T_{ij} A_{k_{ij}})
+						=	  2(\langle{A_i, T}\rangle)\\
 						=	& 2\mathcal{A}(\mathcal{A}^*(y) - S^k)
 					\end{aligned}
 				\end{equation}
@@ -906,13 +930,87 @@
 					\end{equation}
 				\end{theo}
 
+				\begin{proof}
+					设 $Y_1 = U_1 D_1 V_1 ^\top$ , $Y_2 = U_2 D_2 V_2 ^\top$ , 则 $\bar{Y_1} = S_\nu(Y_1) = U_1 \bar{D}_1 V_1 ^\top$ , $\bar{Y_2} = S_\nu(Y_2) = U_2 \bar{D}_2 V_2 ^\top$ . 其中 $D_i = \text{Diag}(\sigma_i)$ , $\bar{D}_i = \text{Diag}(\max\{\sigma_i - \nu, 0\})$ , $\sigma_i \in \mathbb{R}^{r_i}$ 是 $Y_i$ 的奇异值向量, $r_i = \text{rank }Y_i$ , 记 $\sigma_i$ 中大于 $\nu$ 的项数为 $k_i$ , 不失一般性, 我们认为奇异值是从大到小排列的, 即 $\sigma_i^{(1)} \ge \cdots \ge \sigma_i^{(k_i)} \ge \nu \ge \sigma_i^{(k_i + 1)} \ge \cdots \ge \sigma_i^{(r_i)} \ge 0$ , $i = 1, 2$ .
+					\begin{equation*}
+						\begin{split}
+								& \Vert{Y_1 - Y_2}\Vert_F - \Vert{\bar{Y}_1 - \bar{Y}_2}\Vert_F\\
+							=	& tr((Y_1 - Y_2)^\top (Y_1 - Y_2)) - tr((\bar{Y}_1 - \bar{Y}_2)^\top (\bar{Y}_1 - \bar{Y}_2))\\
+							=	& tr(Y_1^\top Y_1 + Y_2^\top Y_2 - \bar{Y}_1^\top \bar{Y}_1 - \bar{Y}_2^\top \bar{Y}_2) + 2tr(Y_1 ^\top Y_2 - \bar{Y}_1 ^\top \bar{Y}_2)\\
+							=	& \sum^{r_1}_{i = 1}(\sigma_1^{(i)})^2 + \sum^{r_2}_{i = 1}(\sigma_2^{(i)})^2 - \sum^{k_1}_{i = 1}(\sigma_1^{(i)} - \nu)^2 - \sum^{k_2}_{i = 1}(\sigma_2^{(i)} - \nu)^2 - 2tr(Y_1 ^\top Y_2 - \bar{Y}_1 ^\top \bar{Y}_2)
+						\end{split}
+					\end{equation*}
+					记 $U = U_1^\top U_2$ , $V =  V_1^\top V_2$ , 将各项展开可得 
+					\begin{equation}\label{inProofSv}
+						tr(Y_1 ^\top Y_2 - \bar{Y}_1 ^\top \bar{Y}_2) = 
+						tr(	(D_1 - \bar{D}_1)^\top U (D_2 - \bar{D}_2)V ^\top
+						+	(D_1 - \bar{D}_1)^\top U \bar{D}_2 V ^\top
+						+	\bar{D}_1^\top U (D_2 - \bar{D}_2) V ^\top)
+					\end{equation}
+					
+					有如下的两个定理成立:
+					\begin{itemize}
+						\item $U$ 是正交矩阵, $tr(AU)$ 取到最大值, 当且仅当 $AU$ 是正定矩阵.
+						\item 当 $AB$ 正定, $tr(AB) \le \sum^{ }_{i}\sigma^{(i)}(A)\sigma^{(i)}(B)$ , $\sigma^{(i)}$ 是矩阵的第 $i$ 个奇异值. 
+					\end{itemize}
+					不失一般性, 我们设 $r_1 > r_2 > k_1 > k_2$ . 对于(\ref{inProofSv})中等式右边的3项, 由上面的定理, 有
+					\begin{equation}
+						\begin{split}
+							tr((D_1 - \bar{D}_1)^\top U (D_2 - \bar{D}_2)V)
+						\le	& \sum^{ }_{i} \sigma^{(i)}(D_1 - \bar{D}_1) \sigma^{(i)}(D_2 - \bar{D}_2)\\
+						\le	& \sum^{k_2}_{i = 1} \nu^2 + \sum^{k_1}_{i = k_2 + 1} \sigma_2^{(i)} \nu + \sum^{r_2}_{i = k_1 + 1} \sigma_1^{(i)} \sigma_2^{(i)}\\
+						\le	& \sum^{k_1}_{i = 1} \sigma_2^{(i)} \nu + \sum^{r_2}_{i = k_1 + 1} \sigma_1^{(i)} \sigma_2^{(i)}\\
+							tr((D_1 - \bar{D}_1)^\top U \bar{D}_2 V ^\top)
+						\le & \sum^{ }_{i} \sigma^{(i)}(D_1 - \bar{D}_1) \sigma^{(i)}(\bar{D}_2)\\
+						\le	& \sum^{k_1}_{i = 1} (\sigma_2^{(i)} - \nu)\nu + \sum^{r_2}_{i = k_1 + 1} (\sigma_2^{(i)} - \nu)\sigma_1^{(i)}\\
+						\le	& \sum^{r_2}_{i = 1} (\sigma_2^{(i)} - \nu)\sigma_1^{(i)}\\
+							tr(\bar{D}_1^\top U (D_2 - \bar{D}_2) V ^\top)
+						\le & \sum^{ }_{i} \sigma^{(i)}(\bar{D}_1) \sigma^{(i)}(D_2 - \bar{D}_2)\\
+						\le	& \sum^{k_2}_{i = 1} (\sigma_1^{(i)} - \nu)\nu + \sum^{r_2}_{i = k_2 + 1} (\sigma_1^{(i)} - \nu)\sigma_2^{(i)}\\
+						\le	& \sum^{r_2}_{i = 1} (\sigma_1^{(i)} - \nu)\sigma_2^{(i)}\\
+						\end{split}
+					\end{equation}
+					则可得
+					\begin{equation}
+						\begin{split}
+								& \Vert{Y_1 - Y_2}\Vert_F - \Vert{\bar{Y}_1 - \bar{Y}_2}\Vert_F\\
+							=	& \sum^{r_1}_{i = 1}(\sigma_1^{(i)})^2 + \sum^{r_2}_{i = 1}(\sigma_2^{(i)})^2 - \sum^{k_1}_{i = 1}(\sigma_1^{(i)} - \nu)^2 - \sum^{k_2}_{i = 1}(\sigma_2^{(i)} - \nu)^2 - 2tr(Y_1 ^\top Y_2 - \bar{Y}_1 ^\top \bar{Y}_2)\\
+							\ge	& \sum^{r_1}_{i = 1}(\sigma_1^{(i)})^2 + \sum^{r_2}_{i = 1}(\sigma_2^{(i)})^2 - \sum^{k_1}_{i = 1}(\sigma_1^{(i)} - \nu)^2 - \sum^{k_2}_{i = 1}(\sigma_2^{(i)} - \nu)^2\\
+								& \quad - 2 \Big(\sum^{k_1}_{i = 1} \sigma_2^{(i)} \nu + \sum^{r_2}_{i = k_1 + 1} \sigma_1^{(i)} \sigma_2^{(i)} + \sum^{r_2}_{i = 1} (\sigma_2^{(i)} - \nu)\sigma_1^{(i)} + \sum^{r_2}_{i = 1} (\sigma_1^{(i)} - \nu)\sigma_2^{(i)} \Big)\\
+							=	& \sum^{k_2}_{i = k_1 + 1} \Big( 2 \sigma_2^{(i)} \nu - \nu^2 + (\sigma_1^{(i)})^2 - 2 \sigma_1^{(i)} \sigma_2^{(i)} \Big)\\
+								& \quad + \Big( \sum^{r_2}_{i = k_1 + 1} (\sigma_1^{(i)})^2 + \sum^{r_1}_{i = k_1 + 1} (\sigma_2^{(i)})^2 - 2 \sum^{r_1}_{i = k_1 + 1} \sigma_1^{(i)} \sigma_2^{(i)} \Big)\\
+							\ge	& \sum^{k_2}_{i = k_1 + 1} \Big( 2 \sigma_2^{(i)} \nu - \nu^2 + (\sigma_1^{(i)})^2 - 2 \sigma_1^{(i)} \sigma_2^{(i)} \Big) + \sum^{r_2}_{i = k_1 + 1} (\sigma_1^{(i)} - \sigma_2^{(i)})^2\\
+							\ge	& \sum^{k_2}_{i = k_1 + 1} \Big( 2 \sigma_2^{(i)} \nu - \nu^2 + (\sigma_1^{(i)})^2 - 2 \sigma_1^{(i)} \sigma_2^{(i)} \Big)
+						\end{split}
+					\end{equation}
+					当 $k_1 < i \le k_2$ , $\sigma_2^{(i)} < \nu \le \sigma_1^{(i)}$ , 则 
+					\[
+						2 \sigma_2^{(i)} \nu - \nu^2 + (\sigma_1^{(i)})^2 - 2 \sigma_1^{(i)} \sigma_2^{(i)} = (\sigma_1^{(i)} - \sigma_2^{(i)})^2 - (\nu - \sigma_2^{(i)})^2 \ge 0
+					\]
+					那么有 $\Vert{Y_1 - Y_2}\Vert_F - \Vert{\bar{Y}_1 - \bar{Y}_2}\Vert_F \ge \sum^{k_2}_{i = k_1 + 1} \Big( 2 \sigma_2^{(i)} \nu - \nu^2 + (\sigma_1^{(i)})^2 - 2 \sigma_1^{(i)} \sigma_2^{(i)} \Big) \ge 0$ , 即 $\Vert{Y_1 - Y_2}\Vert_F \ge \Vert{\bar{Y}_1 - \bar{Y}_2}\Vert_F$.
+				\end{proof}
+				
+				
 				\begin{theo}
 					当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$ , 其中 $A$ 满足 $\mathcal{A}(X) = A \text{vec}(X)$ , $h$ 是非扩张的, 即
 					\begin{equation}
-						\Vert{h(X_1) - h(X_2)}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
+						\begin{split}
+							\Vert{h(X_1) - h(X_2)}\Vert_F \le \Vert{X_1 - X_2}\Vert_F
+						\end{split}
 					\end{equation}
 				\end{theo}
 				
+				\begin{proof}
+					取矩阵 $A$ , 使得 $\mathcal{A}(X) = Avec(X)$ , 则 $h(X) = X - \mu A ^\top (Avec(X) - b)$ ,则 
+					\[
+						\Vert{h(X_1 - X_2)}\Vert_F = \Vert{(I - \mu A ^\top A)(vec(X_1) - vec(X_2)}\Vert_2 \le \Vert{I - \mu A ^\top A}\Vert_2 \Vert{vec(X_1) - vec(X_2}\Vert_2
+					\]
+					由 $\mu < 2/\lambda_{max}(A ^\top A)$ , $\Vert{I - \mu A ^\top A}\Vert_2 < 1$ , 则 
+					\[
+						\Vert{h(X_1 - X_2)}\Vert_F \le \Vert{vec(X_1) - vec(X_2}\Vert_2 \le \Vert{X_1 - X_2}\Vert_F
+					\]
+					这证明了 $h$ 是非扩张的映射.
+				\end{proof}
 			
 			\paragraph{}
 				\quad 那么很自然的推论是, 当 $\mu \in (0, 2/\lambda_{max}(A ^\top A))$
