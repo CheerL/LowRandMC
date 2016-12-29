@@ -567,17 +567,17 @@
 					\item 当 $X \in \mathbb{R}^{p \times q}$ 不是对称正定的, 可以考虑一个更大的对称正定矩阵 $W$ . 当补全了 $W$ , 则 $X$ 自然被补全了
 					\begin{equation}
 						\begin{split}\label{BigRBR}
-							\min_X \quad
-								& tr(X)\\
+							\min_W \quad
+								& tr(W)\\
 							\text{s.t.} \quad
-								& X = \begin{pmatrix}
-											X_1 & W \\
-											W^\top & X_2
+								& W = \begin{pmatrix}
+											W_1 & X \\
+											X^\top & W_2
 										\end{pmatrix} \succ 0\\
 								& W_{ij} = M_{ij}, \quad \forall(i, j) \in \Omega
 						\end{split}
 					\end{equation}
-					\small{其中 $X \in S^{n}$ , $n = p + q$ ,$W_1 \in S^p$ , $W_2 \in  S^q$ , $X, W_1, W_2 \succ \delta$.}\normalsize
+					\small{其中 $W \in S^{n}$ , $n = p + q$ ,$W_1 \in S^p$ , $W_2 \in  S^q$ , $W, W_1, W_2 \succ \delta$.}\normalsize
 				\end{itemize}
 			\end{frame}
 			%--- Next Frame ---%
