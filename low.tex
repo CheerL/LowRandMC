@@ -32,14 +32,18 @@
 %-----------------------------正文------------------------------
 \begin{document}									%开始正文
 	\maketitle										%生成标题
+	\section{摘要}
+		\paragraph{}\quad 本文是在阅读 {\it Solving Low-Rank Matrix Completion Problems Efficiently} 后所写的读书报告, 原文作者是Donald Goldfarb, Shiqian Ma和Zaiwen Wen. 文章大部分内容依照原文翻译, 有些是查阅其他文献所得, 也加入了一些自己的理解和证明.
+		
+		\paragraph{}\quad 本文首先提出了低秩矩阵完整化的几个数学模型, 再对其中三个模型分别提出了一种较为高效的算法, 分别是ADAL法, RBR法和FPCA法. 第一种算法ADAL法, 是考虑原问题的对偶问题, 再用增广拉格朗日函数, 采用交替方向法求解. 第二种算法RBR法, 是基于半定规划, 采用逐行求解不断迭代的方式. 第三种算法FPCA法, 主要是对FPC法的奇异值计算的过程进行了优化, 通过求一个低秩的矩阵的奇异值分解来近似分解整个原矩阵.
 	\section{简介}
-		\subsection{什么是低秩矩阵完整化(low-rank matrix completion)}
+		\subsection{什么是低秩矩阵完整化}
 			\paragraph{}
-				\quad 简单来说, 低秩矩阵完整化问题, 就是在仅仅知道矩阵的少部分元素的情况下, 恢复出这个矩阵的所有元素. 这个问题在统计, 图像处理, 计算几何, 机器学习, 信号处理, 模型控制等方面有广泛应用, 比如著名的NetFlix大奖赛问题.
+				\quad 简单来说, 低秩矩阵完整化问题, 就是在仅仅知道矩阵的少部分元素的情况下, 恢复出这个矩阵的所有元素. 显而易见, 补全一个完全随机的矩阵几乎是不可能的, 也是意义不大的. 一般情况下, 我们认为所需要补全的矩阵是有一定规律的, 也就是说, 这个矩阵的秩比较小. 这个问题在统计, 图像处理, 计算几何, 机器学习, 信号处理, 模型控制等方面有广泛应用, 比如著名的NetFlix大奖赛问题.
 
 		\subsection{数学模型}
 			\paragraph{}
-				\quad 显而易见, 补全一个完全随机的矩阵几乎是不可能的, 也是意义不大的. 一般情况下, 我们认为所需要补全的矩阵是有一定规律的, 也就是说, 这个矩阵的秩比较小. 通常我们最感兴趣的是这样的一个最优化问题:
+				\quad 通常我们最感兴趣的是这样的一个最优化问题:
 				\begin{equation}
 					\begin{split}\label{q1}
 						\min \quad
@@ -51,7 +55,7 @@
 				其中 $X, M\in\mathbb{R}^{p \times q}$ , $\Omega$ 是已知元素的下标 $(i, j)$ 构成的集合, $\lvert{\Omega}\rvert = m$ .
 
 			\paragraph{}
-				\quad 在一些情况下, (\ref{q1})等价于线性约束问题:
+				\quad (\ref{q1})是下面的问题的特殊情况:
 				\begin{equation}
 					\begin{split}\label{q2}
 						\min \quad
@@ -61,24 +65,7 @@
 					\end{split}
 				\end{equation}
 				其中$b = (b_1, \cdots, b_m) \in \mathbb{R}^{m}$ ,
-				$\mathcal{A}: \mathbb{R}^{p \times q} \rightarrow \mathbb{R}^{m}$ 是线性算子,
-				$\mathcal{A}(X) = (\langle{A_1, X}\rangle, \cdots, \langle{A_m, X}\rangle)$ ,
-				$A_i \in \mathbb{R}^{p \times q}, \forall i = 1, \cdots, m$ ,
-				$\langle{A, X}\rangle$ 是矩阵内积,
-
-			\paragraph{}
-				\quad 在此给出线性算子 $\mathcal{A}$ 的共轭算子的定义:
-				$\mathcal{A}^*: \mathbb{R}^{m} \rightarrow \mathbb{R}^{p \times q}$ ,
-				$\mathcal{A}^*(y) = \sum^m_{i = 1}y_i A_i, \forall y = (y_1, \cdots, y_m) \in \mathbb{R}^{m}$ .
-				容易验证 $\mathcal{A}$ 和 $\mathcal{A}^*$ 是well-defined, 即
-				\[
-						\langle{\mathcal{A}(X), y}\rangle 
-					=	\langle{(\langle{A_i, X}\rangle), (y_i)}\rangle
-					=	\sum^m_{i = 1}y_i \langle{A_i, X}\rangle
-					=	\langle{\sum^m_{i = 1}y_i A_i, X}\rangle
-					=	\langle{\mathcal{A}^*(y), X}\rangle
-					=	\langle{X, \mathcal{A}^*(y)}\rangle
-				\]
+				$\mathcal{A}: \mathbb{R}^{p \times q} \rightarrow \mathbb{R}^{m}$ 是线性算子.
 
 			\paragraph{}
 				\quad 但是(\ref{q1}), (\ref{q2})都是"NP-难"的, 因此需要一定的转化. 这里我们用核范数来近似矩阵的秩, 把(\ref{q1})与(\ref{q2})转化为以下形式:
@@ -116,7 +103,29 @@
 				其中 $\mu$ 是某个给定常数.
 
 			\paragraph{}
-				\quad 下面, 将对(\ref{q3}), (\ref{q4}), (\ref{q5})分别给出一种高效的解法.
+				\quad 本文主要将对(\ref{q3}), (\ref{q4}), (\ref{q5})分别给出一种高效的解法.
+		\subsection{一些自己的理解}
+			\subsubsection{$\mathcal{A}$ 与$\mathcal{A}^*$}
+				\paragraph{}
+					\quad 我们可以考虑下(\ref{q2})中给出的线性算子 $\mathcal{A}$ 到底是什么.
+					$\mathcal{A}: \mathbb{R}^{p \times q} \rightarrow \mathbb{R}^{m}$ 可以看作 $m$ 个线性算子的组合, 即 $\mathcal{A}(X) = (\mathcal{A}_1(X), \cdots, \mathcal{A}_m(X))$ , $(\mathcal{A}_i : \mathbb{R}^{p \times q} \rightarrow \mathbb{R}) \in {(\mathbb{R}^{p \times q})}^*$ , $i = 1, \cdots, m$ .
+
+				\paragraph{}
+					\quad 赋予矩阵内积后, $\mathbb{R}^{p \times q}$ 可以看作Hilbert的, ${(\mathbb{R}^{p \times q})}^* = \mathbb{R}^{p \times q}$ . 由Ries表示定理, $\exists A_i \in \mathbb{R}^{p \times q}$ , $\text{s.t. } \mathcal{A}_i(X) = \langle{A_i},{X}\rangle$ , 则 $\mathcal{A}(X) =(\langle{A_1},{X}\rangle, \cdots, \langle{A_m},{X}\rangle)$ . 这说明从 $\mathbb{R}^{p \times q}$ 到 $\mathbb{R}^{m}$ 的线性映射实质上就是 $m$ 个属于 $\mathbb{R}^{p \times q}$ 的矩阵.
+
+				\paragraph{}
+					\quad 我们还可以考虑 ${\mathcal{A}}^*$ , 显然 $\mathcal{A}^* : \mathbb{R}^{m} \rightarrow \mathbb{R}^{p \times q}$ .
+					\[
+							\langle{\mathcal{A}(X), y}\rangle 
+						=	\langle{(\langle{A_i, X}\rangle), (y_i)}\rangle
+						=	\sum^m_{i = 1}y_i \langle{A_i, X}\rangle
+						=	\langle{X, \sum^m_{i = 1}y_i A_i}\rangle
+						=	\langle{X, \mathcal{A}^*(y)}\rangle
+					\]
+					故 $\mathcal{A}^*(y) = \sum^m_{i = 1}y_i A_i$ .
+			\subsubsection{核范数与秩}
+				\paragraph{}
+					\quad 大部分文献中, 都是直接使用核范数来近似秩, 并未说明为什么. 实际上, $\Vert{A}\Vert_* = \Vert{\sigma(A)}\Vert_1$ , $\text{rank } A = \Vert{\sigma(A)}\Vert_0$ , 由此可以看出, 核范数与秩的关系, 即1-范数与0-范数的关系, 故用核范数来近似秩.
 
 	\section{预备知识}
 		\subsection{奇异值分解}
@@ -132,6 +141,16 @@
 		\subsection{矩阵范数}
 			\paragraph{}
 				\quad 以下默认 $A \in \mathbb{R}^{m \times n}$ , $x \in \mathbb{R}^{n}$ , $k = \max \{m, n\}$ , $\sigma(A) = (\sigma_1(A), \cdots, \sigma_k(A)) \in \mathbb{R}^{k}$ 是矩阵 $A$ 的奇异值向量, $\sigma_i(A)$ 是矩阵 $A$ 的第i个奇异值.
+
+			\subsubsection{Schaten-p范数}
+				\paragraph{}
+					\quad 矩阵的Schaten-p范数是矩阵奇异值向量的p-范数:
+					\[
+							\lVert{A}\rVert_{S_p}
+						=	(\sum_i^k \sigma_i(A)^p)^{\frac{1}{p}}
+						=	\lVert{\sigma(A)}\rVert_p
+					\]
+
 			\subsubsection{诱导-p范数}
 				\paragraph{}
 					\quad 矩阵的诱导-p范数是将矩阵看作线性算子, 由向量的p-范数诱导而来.
@@ -144,6 +163,7 @@
 					\[
 						\lVert{A}\rVert_2 = \max_i \sigma_i(A)
 					\]
+					实际上2-范数也是 $p = \infty$ 时的Schaten-p范数.
 
 				\paragraph{}
 					\quad 1-范数, 又称列范数:
@@ -155,24 +175,6 @@
 					\quad $\infty$-范数, 又称行范数:
 					\[
 						\lVert{A}\rVert_\infty = \max_{1 \leq i \leq m}\sum_{j = 1}^n \lvert{a_{ij}}\rvert
-					\]
-
-			\subsubsection{F-范数}
-				\paragraph{}
-					\quad 矩阵的F-范数定义类似于向量的2-范数:
-					\[
-						\lVert{A}\rVert_F = (\sum_{i, j} a_{ij}^2)^{\frac{1}{2}}
-					\]
-				\paragraph{}
-					\quad 定义矩阵内积 $\langle{A, X}\rangle = tr(A^\top X)$, F-范数与矩阵内积是相容的, 即 $\lVert{A}\rVert_F = \langle{A, A}\rangle^{\frac{1}{2}}$ , 可以看作内积诱导的范数.
-
-			\subsubsection{Schaten-p范数}
-				\paragraph{}
-					\quad 矩阵的Schaten-p范数是p-范数应用与矩阵奇异值向量所得的:
-					\[
-							\lVert{A}\rVert_p
-						=	(\sum_i^k \sigma_i(A)^p)^{\frac{1}{p}}
-						=	\lVert{\sigma(A)}\rVert_p
 					\]
 			
 			\subsubsection{核范数}
@@ -191,8 +193,14 @@
 						\lVert{A}\rVert_* = tr(A)
 					\]
 
+			\subsubsection{F-范数}
 				\paragraph{}
-					\quad 核范数 $\lVert{A}\rVert_* = \lVert{\sigma(A)}\rVert_1$ , 而矩阵的秩 $rank(A) = \lVert{\sigma(A)}\rVert_0$ , 由此可以看出, 核范数与秩的关系就是1-范数与0-范数的关系, 故采用核范数来近似秩.
+					\quad 矩阵的F-范数定义类似于向量的2-范数:
+					\[
+						\lVert{A}\rVert_F = (\sum_{i, j} a_{ij}^2)^{\frac{1}{2}}
+					\]
+				\paragraph{}
+					\quad 定义矩阵内积 $\langle{A, X}\rangle = tr(A^\top X)$, F-范数与矩阵内积是相容的, 即 $\lVert{A}\rVert_F = \langle{A, A}\rangle^{\frac{1}{2}}$ , 可以看作内积诱导的范数. F-范数也是 $p = 2$ 时的Schaten-p范数.
 
 		\subsection{罚函数}
 			\paragraph{}
@@ -827,16 +835,16 @@
 				\end{equation}
 			
 			\paragraph{}
-				\quad 引入矩阵的Shinkage算子, 定义如下
+				\quad 引入矩阵的Shrinkage算子, 定义如下
 
-			\begin{define}[Shinkage算子]
-				对 $X \in \mathbb{R}^{m \times n}$ 做奇异值分解, $X = U \text{Diag}(\sigma) V ^\top$ , $r = \text{rank}(X)$ , $U \in \mathbb{R}^{m \times r}$ , $V \in \mathbb{R}^{n \times r}$ , 对 $\forall \nu > 0$ , 定义向量 $\bar{\sigma} = (\bar{\sigma_1}, \cdots, \bar{\sigma_r})$ , 其中$\bar{\sigma_i} = \max \{\sigma_i - \nu, 0\}$ . Shinkage算子 $S_\nu: \mathcal{R}^{m \times n} \rightarrow \mathcal{R}^{m \times n}$ , $S_\nu(X) = U \text{Diag}(\bar{\sigma}) V ^\top$
+			\begin{define}[Shrinkage算子]
+				对 $X \in \mathbb{R}^{m \times n}$ 做奇异值分解, $X = U \text{Diag}(\sigma) V ^\top$ , $r = \text{rank}(X)$ , $U \in \mathbb{R}^{m \times r}$ , $V \in \mathbb{R}^{n \times r}$ , 对 $\forall \nu > 0$ , 定义向量 $\bar{\sigma} = (\bar{\sigma_1}, \cdots, \bar{\sigma_r})$ , 其中$\bar{\sigma_i} = \max \{\sigma_i - \nu, 0\}$ . Shrinkage算子 $S_\nu: \mathcal{R}^{m \times n} \rightarrow \mathcal{R}^{m \times n}$ , $S_\nu(X) = U \text{Diag}(\bar{\sigma}) V ^\top$
 			\end{define}
 
 			\paragraph{}
 				\quad 当认为(\ref{FPCQ})中的 $Y$ 是给定的情况下, 有如下定理
 			\begin{theo}
-				问题(\ref{FPCQ})中, 当给定 $Y \in \mathcal{R}^{m \times n}$ , 最优解为 $S_{\psi \mu}(Y)$, 其中 $S_{\psi \mu}(\cdot)$ 是Shinkage算子
+				问题(\ref{FPCQ})中, 当给定 $Y \in \mathcal{R}^{m \times n}$ , 最优解为 $S_{\psi \mu}(Y)$, 其中 $S_{\psi \mu}(\cdot)$ 是Shrinkage算子
 			\end{theo}
 			
 			\begin{proof}
@@ -846,7 +854,7 @@
 
 				若 $0 \in \nu \partial \lVert{X}\rVert_* + X -Y$ , 则说明 $\exists W \in \partial \lVert{X}\rVert_*$ 使 $\nu (UV ^\top + W) + X -Y = 0$ . 那么可以看到当 $W = \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top$ , 则要求
 				\begin{equation}
-					\begin{split}\label{ShinkageCondition}
+					\begin{split}\label{ShrinkageCondition}
 							&\nu (UV ^\top + W) + X -Y\\
 						=	&(\nu U I V ^\top + \bar{U}[\text{Diag}(\bar{\sigma}), 0]\bar{V} ^\top + U \text{Diag}(\sigma) V ^\top) - Y\\
 						=	&\begin{pmatrix}
@@ -886,7 +894,7 @@
 					\end{split}
 				\end{equation}
 
-				当 $\gamma_1 \ge \cdots \ge \gamma_t \ge \nu$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = t$ , $U = U_Y$ , $V = V_Y$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_t - \nu)$ , 对于这样的 $X$ , 取 $\bar{\sigma} = 0$ 即 $W = 0$ , (\ref{ShinkageCondition})成立.
+				当 $\gamma_1 \ge \cdots \ge \gamma_t \ge \nu$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = t$ , $U = U_Y$ , $V = V_Y$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_t - \nu)$ , 对于这样的 $X$ , 取 $\bar{\sigma} = 0$ 即 $W = 0$ , (\ref{ShrinkageCondition})成立.
 
 				当 $\gamma_1 \ge \cdots \ge \gamma_k \ge \nu \ge \gamma_{k + 1} \ge \cdots \ge \gamma_t$ , 那我们令 $X = S_\nu(Y)$ , 则 $r = k$ , $\sigma = (\gamma_1 - \nu, \cdots, \gamma_k - \nu, 0, \cdots, 0)$ , 对这样的 $X$ , 取 $\bar{\sigma} = (\gamma_{k + 1}/\nu, \cdots, \gamma_{t}/\nu, 0, \cdots, 0)$ , 同时令 $\bar{U}$ 的前 $t - k$ 行依次为 $U_Y$ 的 $k + 1$ 至 $t$ 行, $\bar{V}$ 的前 $t - k$ 行依次为 $V_Y$ 的 $k + 1$ 至 $t$ 行, 即 
 					$
@@ -907,7 +915,7 @@
 							V_Y \\ \bar{V}'
 						\end{pmatrix}
 					$ ,
-				其中 $\bar{U}'$ 是 $\bar{U}$ 的后 $m - t$ 行, $\bar{V}'$ 是 $\bar{V}$ 的后 $n - t$ 行, 此时(\ref{ShinkageCondition})也成立.
+				其中 $\bar{U}'$ 是 $\bar{U}$ 的后 $m - t$ 行, $\bar{V}'$ 是 $\bar{V}$ 的后 $n - t$ 行, 此时(\ref{ShrinkageCondition})也成立.
 
 				故 $S_{\psi \mu}(Y)$ 是(\ref{FPCQ})的解.
 			\end{proof}
@@ -924,7 +932,7 @@
 			\paragraph{}
 				\quad 我们有如下的结论
 				\begin{theo}
-					Shinkage算子 $S_\nu(\cdot)$ 是非扩张的, 即
+					Shrinkage算子 $S_\nu(\cdot)$ 是非扩张的, 即
 					\begin{equation}
 						\Vert{S_\nu(Y_1) - S_\nu(Y_2)}\Vert_F \le \Vert{Y_1 - Y_2}\Vert_F
 					\end{equation}
